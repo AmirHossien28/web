@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "build:standalone": "node scripts/build-standalone.mjs",
-    "verify:standalone": "node scripts/verify-standalone.mjs"
+    "verify:standalone": "node scripts/verify-standalone.mjs",
+    "build:pages": "npm run build:standalone && node scripts/publish-pages.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
