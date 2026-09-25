@@ -1,0 +1,6 @@
+{
+  "name": "Aladdin DXP — پلتفرم مهندسی طراحی وب و دیزاین سیستم",
+  "description": "سیستم جامع طراحی وب‌سایت، پلتفرم‌های فروشگاهی، پورتال‌های سازمانی Next.js و دیزاین سیستم چندزبانه با سئو تکنیکال علاءالدین DXP.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
