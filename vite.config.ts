@@ -25,7 +25,12 @@ export default defineConfig(() => {
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      // Build output folders are never watched: rebuilding them would otherwise
+      // trigger a full page reload loop in the preview.
+      watch:
+        process.env.DISABLE_HMR === 'true'
+          ? null
+          : { ignored: ['**/dist/**', '**/dist-*/**', '**/docs/**', '**/standalone/**', '**/.git/**'] },
     },
   };
 });
