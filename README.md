@@ -27,6 +27,8 @@ Optional: append `?lang=en|fa|ar|tr|de` to the URL to force a locale.
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build |
 | `npm run lint` | TypeScript type check (`tsc --noEmit`) |
+| `npm run build:standalone` | Single self-contained HTML file in `standalone/` |
+| `npm run verify:standalone` | Loads that file in jsdom and drives the app end to end |
 
 ## Project structure
 
@@ -70,6 +72,25 @@ Key properties:
 - **RTL-first**, logical CSS properties, localised digits for `fa`/`ar`, isolated Latin runs for phone numbers, domains and codes.
 - **WCAG 2.2 AA** encoded in the tokens and primitives: 4.5:1 text contrast, 2px focus rings, 44px targets, focus never hidden behind the sticky header.
 - **Persian typography** tuned for the script: Vazirmatn, `letter-spacing: 0`, body line-height 1.8–1.85.
+
+## Viewing the site
+
+The sandbox's public URLs require a traffic-access token, so an `*.e2b.app` link
+cannot be opened directly from outside. Two supported ways to view the app:
+
+1. **Live preview panel** — the running dev server is proxied by the platform,
+   which injects the token; open the preview panel in the workspace UI.
+2. **Single self-contained file** — build a standalone HTML file that runs from
+   `file://` with no server and no install:
+
+   ```bash
+   npm run build:standalone      # → standalone/aladdin-dxp.html (~940 KB)
+   npm run verify:standalone     # optional: needs `npm i -D jsdom`
+   ```
+
+   Download that file and open it in any browser (double-click).
+
+Running it yourself locally also works: `npm install && npm run dev`.
 
 This app is fully client-side; no API key or server is required to run it.
 `env.example` documents the optional `GEMINI_API_KEY` / `APP_URL` variables used by the
