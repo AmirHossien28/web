@@ -1,12 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { ProjectItem, PageId, LocaleKey } from '../../types';
+import * as React from 'react';
+import { ExternalLink, Laptop, RotateCw, Smartphone, Tablet, X } from 'lucide-react';
+import type { LocaleKey, PageId, ProjectItem } from '../../types';
 import { SECTIONS_I18N } from '../../data/sectionsI18n';
+import { Badge, Button } from '../../design-system/primitives';
+import { cx } from '../../design-system/tokens';
+import { ui } from '../../app/i18n';
 
-interface PortfolioPreviewModalProps {
+/**
+ * Responsive preview
+ * --------------------------------------------------------------------------
+ * Lets the visitor inspect a real project at three viewport widths without
+ * leaving the page. The dialog traps focus, closes on Escape and announces
+ * itself as a modal; the iframe keeps its own scroll position per device.
+ */
+
+type Device = 'desktop' | 'tablet' | 'mobile';
+
+const DEVICE_WIDTH: Record<Device, string> = {
+  desktop: '100%',
+  tablet: '834px',
+  mobile: '390px',
+};
+
+export interface PortfolioPreviewModalProps {
   project: ProjectItem | null;
   onClose: () => void;
   onNavigate?: (page: PageId) => void;
-  onGoToProjectPage?: (projectId: string) => void;
   currentLocale?: LocaleKey;
 }
 
@@ -14,226 +33,186 @@ export const PortfolioPreviewModal: React.FC<PortfolioPreviewModalProps> = ({
   project,
   onClose,
   onNavigate,
-  onGoToProjectPage,
   currentLocale = 'fa',
 }) => {
-  const t = SECTIONS_I18N[currentLocale].previewModal;
-  const isRtl = currentLocale === 'fa' || currentLocale === 'ar';
-  const [viewportMode, setViewportMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const locale = currentLocale;
+  const t = ui(locale);
+  const copy = SECTIONS_I18N[locale].previewModal;
+  const caseStudy = SECTIONS_I18N[locale].caseStudies;
+  const [device, setDevice] = React.useState<Device>('desktop');
+  const [reloadKey, setReloadKey] = React.useState(0);
+  const panelRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+  React.useEffect(() => {
+    if (!project) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])') ?? [],
+      ).filter(el => el.offsetParent !== null);
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
-    if (project) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
+
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previous;
+      document.removeEventListener('keydown', onKey);
     };
   }, [project, onClose]);
 
+  React.useEffect(() => {
+    if (project) setDevice('desktop');
+  }, [project]);
+
   if (!project) return null;
 
-  const handleGoToSitePortfolio = () => {
-    onClose();
-    if (onGoToProjectPage) {
-      onGoToProjectPage(project.id);
-    } else if (onNavigate) {
-      onNavigate('portfolio');
-    }
-  };
-
-  const viewportWidthClass = {
-    desktop: 'w-full max-w-full',
-    tablet: 'w-full max-w-[768px]',
-    mobile: 'w-full max-w-[390px]',
-  }[viewportMode];
+  const devices: { id: Device; label: string; icon: React.ReactNode }[] = [
+    { id: 'desktop', label: copy.desktop, icon: <Laptop size={16} aria-hidden="true" /> },
+    { id: 'tablet', label: copy.tablet, icon: <Tablet size={16} aria-hidden="true" /> },
+    { id: 'mobile', label: copy.mobile, icon: <Smartphone size={16} aria-hidden="true" /> },
+  ];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 animate-in fade-in duration-200"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="preview-title"
-    >
-      {/* Backdrop */}
-      <div
+    <div className="fixed inset-0 z-modal flex items-center justify-center p-3 sm:p-6">
+      <button
+        type="button"
+        aria-label={copy.closeTooltip}
         onClick={onClose}
-        className="absolute inset-0 bg-[#050d23]/85 backdrop-blur-md transition-opacity cursor-pointer"
+        className="absolute inset-0 cursor-default bg-overlay animate-fade-in"
+        tabIndex={-1}
       />
 
-      {/* Modal Window Container */}
-      <div className="relative w-full max-w-6xl h-[95vh] max-h-[940px] flex flex-col rounded-2xl sm:rounded-3xl bg-[#0b1329] border border-white/15 shadow-[0_24px_70px_-15px_rgba(0,18,48,0.95)] overflow-hidden z-10 animate-in zoom-in-95 duration-200">
-        
-        {/* Top Chrome Toolbar */}
-        <div className="h-14 px-3 sm:px-4 bg-[#111c3d]/95 border-b border-white/10 flex items-center justify-between gap-2 shrink-0 backdrop-blur-md z-20">
-          
-          {/* Left: Window Controls, Title & Direct Button */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* macOS Style Window Controls */}
-            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
-              <button
-                type="button"
-                onClick={onClose}
-                title="بستن پنجره"
-                className="w-3.5 h-3.5 rounded-full bg-rose-500 hover:bg-rose-600 transition-colors shadow-sm cursor-pointer"
-              />
-              <span className="w-3.5 h-3.5 rounded-full bg-amber-400 shadow-sm" />
-              <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-sm" />
-            </div>
-
-            {/* Project Title */}
-            <div className="flex flex-col min-w-0">
-              <h4 id="preview-title" className="text-xs sm:text-sm font-bold text-white truncate max-w-[160px] sm:max-w-[260px] md:max-w-none">
-                {project.title}
-              </h4>
-              <div className="flex items-center gap-1 text-[10px] text-slate-400 truncate">
-                <span className="material-symbols-outlined text-[12px] text-emerald-400">lock</span>
-                <span className="font-mono text-slate-300" dir="ltr">{project.domain}</span>
-              </div>
-            </div>
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="preview-title"
+        className="relative flex h-full max-h-[92vh] w-full max-w-6xl animate-scale-in flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-xl"
+      >
+        {/* header */}
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3 sm:px-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <Badge tone="neutral" variant="square">
+              {project.industry}
+            </Badge>
+            <h2 id="preview-title" className="truncate text-body-sm font-semibold text-ink">
+              {project.title}
+              <span className="text-ink-3"> — {copy.titleSuffix}</span>
+            </h2>
           </div>
 
-          {/* Center: Device Viewport Switcher */}
-          <div className="flex items-center bg-[#070d1e] rounded-xl p-0.5 border border-white/10 shrink-0">
-            <button
-              type="button"
-              onClick={() => setViewportMode('desktop')}
-              title={t.desktop}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
-                viewportMode === 'desktop'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">desktop_windows</span>
-              <span className="hidden md:inline text-[11px]">{t.desktop}</span>
-            </button>
+          <div className="flex items-center gap-2">
+            <div role="group" aria-label={copy.titleSuffix} className="hidden items-center gap-1 sm:flex">
+              {devices.map(item => {
+                const active = device === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={active}
+                    title={item.label}
+                    onClick={() => setDevice(item.id)}
+                    className={cx(
+                      'inline-flex size-9 items-center justify-center rounded-sm border transition-colors duration-[140ms]',
+                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus',
+                      active
+                        ? 'border-brand bg-brand-soft text-brand-ink'
+                        : 'border-line text-ink-3 hover:bg-neutral-hover hover:text-ink',
+                    )}
+                  >
+                    {item.icon}
+                    <span className="sr-only">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
             <button
               type="button"
-              onClick={() => setViewportMode('tablet')}
-              title={t.tablet}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
-                viewportMode === 'tablet'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
+              onClick={() => setReloadKey(key => key + 1)}
+              title={copy.scrollTip}
+              className="inline-flex size-9 items-center justify-center rounded-sm border border-line text-ink-3 transition-colors duration-[140ms] hover:bg-neutral-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
-              <span className="material-symbols-outlined text-[16px]">tablet_mac</span>
-              <span className="hidden md:inline text-[11px]">{t.tablet}</span>
+              <RotateCw size={15} aria-hidden="true" />
+              <span className="sr-only">{copy.scrollTip}</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setViewportMode('mobile')}
-              title={t.mobile}
-              className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1 ${
-                viewportMode === 'mobile'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">smartphone</span>
-              <span className="hidden md:inline text-[11px]">{t.mobile}</span>
-            </button>
-          </div>
-
-          {/* Right: The Requested Button (Go to Sample Work Page in Site) & Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* The primary button requested by user: Goes to sample work page in site */}
-            <button
-              type="button"
-              onClick={handleGoToSitePortfolio}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-bold shadow-md shadow-blue-600/30 hover:shadow-blue-500/50 transition-all cursor-pointer active:scale-95"
-            >
-              <span className="material-symbols-outlined text-[16px]">
-                {isRtl ? 'arrow_forward' : 'arrow_back'}
-              </span>
-              <span className="hidden xs:inline sm:inline">{t.goToWorkPage}</span>
-              <span className="xs:hidden sm:hidden">{t.portfolioShort}</span>
-            </button>
-
-            {/* Direct External URL visit (optional secondary) */}
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t.liveDomain}
-              className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 border border-white/10 text-xs font-medium transition-all"
-            >
-              <span className="material-symbols-outlined text-[15px]">open_in_new</span>
-              <span>{t.liveDomain}</span>
-            </a>
-
-            {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
-              title={t.closeTooltip}
-              className="w-8 h-8 rounded-xl bg-white/10 hover:bg-rose-500 hover:text-white text-slate-300 flex items-center justify-center border border-white/10 transition-colors cursor-pointer"
+              aria-label={copy.closeTooltip}
+              className="inline-flex size-9 items-center justify-center rounded-sm border border-line text-ink-3 transition-colors duration-[140ms] hover:bg-neutral-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
-        </div>
+        </header>
 
-        {/* Scrollable Preview Area (No extra content or description - Pure full website scrollable page!) */}
-        <div className="flex-1 bg-[#050914] overflow-y-auto p-2 sm:p-4 md:p-6 flex flex-col items-center justify-start custom-scrollbar">
-          <div className={`${viewportWidthClass} transition-all duration-300 ease-out flex flex-col rounded-xl sm:rounded-2xl bg-[#0b1329] border border-white/15 shadow-[0_15px_50px_rgba(0,0,0,0.7)] overflow-hidden shrink-0`}>
-            
-            {/* Realistic Browser Address Bar */}
-            <div className="h-9 px-3 bg-[#111933] border-b border-white/10 flex items-center justify-between gap-2 text-xs text-slate-400 select-none shrink-0" dir="ltr">
-              <div className="flex items-center gap-1.5 text-slate-500">
-                <span className="material-symbols-outlined text-[14px]">arrow_back</span>
-                <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                <span className="material-symbols-outlined text-[14px]">refresh</span>
-              </div>
-              
-              <div className="flex-1 max-w-md mx-auto flex items-center justify-center gap-1.5 px-3 py-1 rounded-lg bg-[#070d1e] text-[11px] font-mono text-slate-300 border border-white/5 truncate">
-                <span className="material-symbols-outlined text-[13px] text-emerald-400 shrink-0">lock</span>
-                <span className="text-emerald-400">https://</span>
-                <span className="text-white font-semibold truncate">{project.domain}</span>
-              </div>
-
-              <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-bold shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>100% Responsive</span>
-              </div>
-            </div>
-
-            {/* Scrollable Website Mockup Page */}
-            <div className="w-full bg-[#030712] relative overflow-hidden flex flex-col">
-              <img
-                src={project.img}
-                alt={`طراحی سایت ${project.title}`}
-                loading="eager"
-                className="w-full h-auto object-top block select-none pointer-events-none"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Floating Mobile Bottom Action for Ease of Access on Small Screens */}
-        <div className="sm:hidden p-2.5 bg-[#0b1329]/95 border-t border-white/10 backdrop-blur-md flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-xs text-white font-bold truncate">{project.title}</span>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoToSitePortfolio}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 text-white text-xs font-bold shrink-0 shadow-md cursor-pointer active:scale-95"
+        {/* viewport */}
+        <div className="flex flex-1 justify-center overflow-hidden bg-subtle p-3 sm:p-6">
+          <div
+            className="h-full overflow-hidden rounded-md border border-line bg-surface transition-[width] duration-[320ms] ease-[cubic-bezier(0.2,0,0,1)]"
+            style={{ width: DEVICE_WIDTH[device], maxWidth: '100%' }}
           >
-            <span>مشاهده در سایت</span>
-            <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-          </button>
+            <iframe
+              key={`${device}-${reloadKey}`}
+              src={project.url}
+              title={`${project.title} — ${copy.liveDomain}`}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
+              className="h-full w-full bg-surface"
+            />
+          </div>
         </div>
 
+        <p className="border-t border-line bg-subtle px-4 py-2 text-caption text-ink-4 sm:px-5">
+          {copy.scrollTip}
+        </p>
+
+        {/* footer */}
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-ink-3">
+            <span data-numeric>
+              {copy.liveDomain}:{' '}
+              <span dir="ltr" className="ltr-isolate text-ink-2">
+                {project.domain}
+              </span>
+            </span>
+            <span aria-hidden="true" className="hidden h-3 w-px bg-line sm:inline-block" />
+            <span className="text-success-ink">{project.leadResult}</span>
+          </p>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {onNavigate && (
+              <Button tone="neutral" emphasis="ghost" size="sm" onClick={() => onNavigate('portfolio')}>
+                {copy.portfolioShort}
+              </Button>
+            )}
+            <a href={project.url} target="_blank" rel="noopener noreferrer" className="contents">
+              <Button tone="brand" emphasis="outline" size="sm">
+                <ExternalLink size={15} aria-hidden="true" />
+                {caseStudy.viewLive}
+              </Button>
+            </a>
+          </div>
+        </footer>
       </div>
     </div>
   );

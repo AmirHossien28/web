@@ -1,225 +1,309 @@
-import React, { useState } from 'react';
-import { LocaleKey } from '../../types';
-import { I18N_DATA } from '../../data/i18n';
+import * as React from 'react';
+import { Building2, Check, Clock, Mail, MapPin, MessageCircle, Phone, ShieldCheck, Users } from 'lucide-react';
+import type { LocaleKey, PageId } from '../../types';
+import { Badge, Button, Card, Field, IconFrame, Section, SectionHeading } from '../../design-system/primitives';
+import { PageHeader } from '../chrome/PageHeader';
+import { homeCopy } from '../../app/homeCopy';
+import { localiseDigits, ui } from '../../app/i18n';
 
-interface ContactViewProps {
-  isLightMode: boolean;
-  currentLocale: LocaleKey;
+/**
+ * About & contact
+ * --------------------------------------------------------------------------
+ * Two jobs on one page: establish who we are (values + numbers), then make it
+ * effortless to start a conversation. The form is short by design — three
+ * required fields, one optional brief — and validates inline without shouting.
+ */
+
+const VALUES = [
+  {
+    icon: <ShieldCheck size={18} aria-hidden="true" />,
+    title: 'شفافیت',
+    body: 'قیمت، زمان‌بندی و محدوده پروژه از روز اول مکتوب است؛ هیچ هزینه‌ای در میانه راه اضافه نمی‌شود.',
+  },
+  {
+    icon: <Users size={18} aria-hidden="true" />,
+    title: 'تیم ثابت',
+    body: 'پروژه شما به تیم ثابت خودمان سپرده می‌شود؛ برون‌سپاری و تغییر مداوم نیرو نداریم.',
+  },
+  {
+    icon: <Building2 size={18} aria-hidden="true" />,
+    title: 'مهندسی، نه ادعا',
+    body: 'هر ادعای عملکردی با اندازه‌گیری قابل تکرار پشتیبانی می‌شود: سرعت، دسترس‌پذیری و پایداری.',
+  },
+];
+
+export interface ContactViewProps {
+  locale: LocaleKey;
+  onNavigate: (page: PageId) => void;
+  hotline: string;
+  whatsapp: string;
 }
 
-export const ContactView: React.FC<ContactViewProps> = ({ isLightMode, currentLocale }) => {
-  const content = I18N_DATA[currentLocale];
-  const [formName, setFormName] = useState('');
-  const [formEmail, setFormEmail] = useState('');
-  const [formPhone, setFormPhone] = useState('');
-  const [formMessage, setFormMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+export const ContactView: React.FC<ContactViewProps> = ({ locale, onNavigate, hotline, whatsapp }) => {
+  const t = ui(locale);
+  const trust = homeCopy(locale).trust;
 
-  const branches = [
-    {
-      city: 'تهران (دفتر مرکزی)',
-      address: 'خیابان شریعتی، بالاتر از میرداماد، برج فناوری صبا، طبقه ۸',
-      phone: '9000 9830',
-      direct: '+98 21 8845 2200',
-      status: 'فعال - پذیرش حضوری با هماهنگی',
-    },
-    {
-      city: 'دبی (دفتر بین‌الملل خاورمیانه)',
-      address: 'Sheikh Zayed Rd, Trade Centre 1, Dubai, UAE',
-      phone: '+971 4 234 5678',
-      direct: '+971 4 234 5678',
-      status: 'فعال - پشتیبانی پروژه‌های ارزی و چندزبانه',
-    },
-    {
-      city: 'لندن (مرکز زیرساخت ابری اروپا)',
-      address: 'Level 14, 1 Canada Square, Canary Wharf, London, UK',
-      phone: '+44 20 7946 0912',
-      direct: '+44 20 7946 0912',
-      status: 'فعال - پشتیبانی DevOps و سرورهای ابری',
-    },
-  ];
+  const [values, setValues] = React.useState({
+    name: '',
+    phone: '',
+    email: '',
+    details: '',
+    service: 'corporate',
+  });
+  const [errors, setErrors] = React.useState<{ name?: string; phone?: string }>({});
+  const [state, setState] = React.useState<'idle' | 'sending' | 'sent'>('idle');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formPhone.trim()) return;
-    setSubmitted(true);
+  const submit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const next: typeof errors = {};
+    if (values.name.trim().length < 3) next.name = 'نام و نام خانوادگی را کامل وارد کنید.';
+    const phone = values.phone.replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[\s-]/g, '');
+    if (!/^(0\d{10}|\+98\d{10})$/.test(phone)) next.phone = 'شماره تماس معتبر نیست؛ نمونه: ۰۹۱۲۳۴۵۶۷۸۹';
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    setState('sending');
+    window.setTimeout(() => setState('sent'), 700);
   };
 
   return (
-    <div className="w-full py-12 px-4 lg:px-8 max-w-7xl mx-auto">
-      {/* Title */}
-      <div className="text-center max-w-3xl mx-auto mb-12">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 text-sky-400 border border-sky-400/20 text-xs font-bold mb-3">
-          <span className="material-symbols-outlined text-[16px]">call</span>
-          <span>ارتباط مستقیم با مشاوران ارشد و مدیریت فنی</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
-          تماس با شرکت طراحی سایت علاءالدین
-        </h1>
-        <p className="text-sm text-slate-400">
-          برای برگزاری جلسات حضوری، مشاوره تلفنی، درخواست دمو و بررسی طرح‌های بین‌المللی همراه شما هستیم.
-        </p>
-      </div>
+    <>
+      <PageHeader
+        page="about-contact"
+        locale={locale}
+        onNavigate={onNavigate}
+        actions={
+          <a href={`tel:${hotline}`} className="contents">
+            <Button tone="brand" size="lg">
+              <Phone size={16} aria-hidden="true" />
+              <span data-numeric dir="ltr" className="ltr-isolate">
+                {localiseDigits(hotline, locale)}
+              </span>
+            </Button>
+          </a>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-16">
-        {/* Contact Form (7 cols) */}
-        <div className={`lg:col-span-7 rounded-3xl border p-6 sm:p-8 flex flex-col gap-5 shadow-xl ${
-          isLightMode ? 'bg-white border-slate-200' : 'bg-[#0b1329] border-white/10'
-        }`}>
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined text-sky-400">mail</span>
-            <span>ارسال پیام و ثبت درخواست جلسه آنلاین</span>
-          </h3>
-
-          {submitted ? (
-            <div className="p-6 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex flex-col items-center text-center gap-3">
-              <span className="material-symbols-outlined text-emerald-400 text-[36px]">mark_email_read</span>
-              <h4 className="text-base font-bold text-emerald-400">پیام شما با موفقیت ارسال شد</h4>
-              <p className="text-xs text-slate-300">
-                کارشناس فنی علاءالدین در سریع‌ترین زمان ممکن با شما تماس حاصل خواهد نمود.
+      <Section level="canvas">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {trust.stats.map(stat => (
+            <div key={stat.label} className="rounded-lg border border-line bg-surface p-6">
+              <p data-numeric className="text-title-1 font-bold text-ink">
+                {localiseDigits(
+                  stat.decimals ? stat.value.toFixed(stat.decimals).replace('.', locale === 'fa' ? '٫' : '.') : stat.value,
+                  locale,
+                )}
+                {stat.suffix ?? ''}
               </p>
-              <button
-                type="button"
-                onClick={() => { setSubmitted(false); setFormMessage(''); }}
-                className="mt-2 text-xs text-sky-400 underline font-semibold cursor-pointer"
-              >
-                ارسال پیام دیگر
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-slate-300">نام و نام خانوادگی</label>
-                  <input
-                    type="text"
-                    required
-                    value={formName}
-                    onChange={(e) => setFormName(e.target.value)}
-                    placeholder="مثلاً: احمد رضایی"
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#060a14] border border-white/10 text-xs text-white outline-none focus:border-sky-400"
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs text-slate-300">شماره تماس مستقیم</label>
-                  <input
-                    type="tel"
-                    required
-                    dir="ltr"
-                    value={formPhone}
-                    onChange={(e) => setFormPhone(e.target.value)}
-                    placeholder="0912..."
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#060a14] border border-white/10 text-xs font-mono text-white outline-none focus:border-sky-400"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-300">ایمیل کاری (اختیاری جهت ارسال پیش‌فاکتور)</label>
-                <input
-                  type="email"
-                  value={formEmail}
-                  onChange={(e) => setFormEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="w-full h-11 px-3.5 rounded-xl bg-[#060a14] border border-white/10 text-xs text-white outline-none focus:border-sky-400"
-                />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <label className="text-xs text-slate-300">متن پیام یا شرح نیازمندی‌های پروژه</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={formMessage}
-                  onChange={(e) => setFormMessage(e.target.value)}
-                  placeholder="لطفاً زمینه کاری، تعداد زبان‌ها و امکانات مدنظرتان را مرقوم بفرمایید..."
-                  className="w-full p-3.5 rounded-xl bg-[#060a14] border border-white/10 text-xs text-white outline-none focus:border-sky-400"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
-              >
-                <span className="material-symbols-outlined text-[18px]">send</span>
-                <span>ارسال پیام به واحد مهندسی</span>
-              </button>
-            </form>
-          )}
-        </div>
-
-        {/* Quick Contact Info Sidebar (5 cols) */}
-        <div className={`lg:col-span-5 rounded-3xl border p-6 sm:p-8 flex flex-col gap-6 shadow-xl ${
-          isLightMode ? 'bg-white border-slate-200' : 'bg-[#0b1329] border-white/10'
-        }`}>
-          <h3 className="text-lg font-bold">راه‌های ارتباطی سریع</h3>
-
-          <div className="flex flex-col gap-4 text-xs text-slate-300">
-            <div className="p-4 rounded-2xl bg-[#171f35] border border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-sky-400 text-[24px]">call</span>
-                <div className="flex flex-col">
-                  <span className="font-bold text-white">خط ویژه سراسری (بدون پیش‌شماره)</span>
-                  <span className="text-[11px] text-slate-400">پاسخگویی فوری کارشناسان</span>
-                </div>
-              </div>
-              <a href={`tel:${content.marketContact.hotline}`} className="font-mono text-base font-bold text-sky-400" dir="ltr">
-                {content.marketContact.hotlineFormatted}
-              </a>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#171f35] border border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-emerald-400 text-[24px]">chat</span>
-                <div className="flex flex-col">
-                  <span className="font-bold text-white">پشتیبانی واتساپ و تلگرام</span>
-                  <span className="text-[11px] text-slate-400">ارسال فایل و پروپوزال</span>
-                </div>
-              </div>
-              <a href={content.marketContact.whatsapp} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500 hover:text-white transition-all">
-                چت آنلاین
-              </a>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-[#171f35] border border-white/5 flex items-start gap-3">
-              <span className="material-symbols-outlined text-amber-400 text-[24px] shrink-0">schedule</span>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold text-white">ساعات کاری و پشتیبانی</span>
-                <span className="text-slate-400">شنبه تا چهارشنبه: ۹:۰۰ الی ۱۸:۰۰</span>
-                <span className="text-emerald-400 font-semibold">تیم مانیتورینگ سرورها: ۲۴ ساعته فعال</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Branches Grid */}
-      <div>
-        <h3 className="text-xl font-bold mb-6">دفاتر و مراکز منطقه‌ای علاءالدین DXP</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {branches.map((b, idx) => (
-            <div
-              key={idx}
-              className={`p-6 rounded-3xl border flex flex-col justify-between shadow-md ${
-                isLightMode ? 'bg-white border-slate-200' : 'bg-[#0b1329] border-white/10'
-              }`}
-            >
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                  <h4 className="text-sm font-bold text-white">{b.city}</h4>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">{b.address}</p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                <span className="font-mono text-sky-400 font-bold" dir="ltr">{b.phone}</span>
-                <span className="text-[10px] text-emerald-400">{b.status.split('-')[0]}</span>
-              </div>
+              <p className="mt-2 text-caption text-ink-3">{stat.label}</p>
+              {stat.hint && <p className="mt-1 text-caption text-ink-4">{stat.hint}</p>}
             </div>
           ))}
         </div>
-      </div>
-    </div>
+
+        <SectionHeading
+          className="mt-16"
+          overline="ارزش‌های کاری ما"
+          title="سه اصلی که در همه پروژه‌ها رعایت می‌شود"
+          description="این اصول، معیار تصمیم‌گیری تیم ما در هر مرحله از پروژه است."
+        />
+
+        <div className="mt-10 grid gap-px overflow-hidden rounded-lg border border-line bg-line lg:grid-cols-3">
+          {VALUES.map(value => (
+            <article key={value.title} className="flex flex-col gap-4 bg-surface p-6 lg:p-8">
+              <IconFrame>{value.icon}</IconFrame>
+              <h3 className="text-title-3">{value.title}</h3>
+              <p className="text-body-sm text-ink-2">{value.body}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      {/* ------------------------------ contact ------------------------------ */}
+      <Section level="subtle" bordered>
+        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-5">
+            <p className="text-overline font-semibold uppercase text-brand-ink">شروع همکاری</p>
+            <h2 className="mt-3 text-title-1">{t.actions.consult}</h2>
+            <p className="mt-3 text-body-sm text-ink-2">
+              فرم را پر کنید یا مستقیم تماس بگیرید؛ کارشناس ارشد ما در نخستین ساعت کاری پاسخ می‌دهد.
+            </p>
+
+            <ul className="mt-8 flex flex-col divide-y divide-line border-y border-line">
+              <li className="flex items-start gap-3 py-4">
+                <IconFrame tone="neutral" size="sm">
+                  <Phone size={16} aria-hidden="true" />
+                </IconFrame>
+                <div>
+                  <p className="text-caption text-ink-3">{t.utility.hotline}</p>
+                  <a
+                    href={`tel:${hotline}`}
+                    dir="ltr"
+                    className="ltr-isolate text-body-sm font-semibold text-ink hover:text-brand-ink"
+                  >
+                    {localiseDigits(hotline, locale)}
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3 py-4">
+                <IconFrame tone="neutral" size="sm">
+                  <MessageCircle size={16} aria-hidden="true" />
+                </IconFrame>
+                <div>
+                  <p className="text-caption text-ink-3">{t.actions.whatsapp}</p>
+                  <a
+                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    dir="ltr"
+                    className="ltr-isolate text-body-sm font-semibold text-ink hover:text-brand-ink"
+                  >
+                    {whatsapp}
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3 py-4">
+                <IconFrame tone="neutral" size="sm">
+                  <Mail size={16} aria-hidden="true" />
+                </IconFrame>
+                <div>
+                  <p className="text-caption text-ink-3">{t.forms.email}</p>
+                  <a href="mailto:info@aladdinweb.ir" dir="ltr" className="ltr-isolate text-body-sm font-semibold text-ink hover:text-brand-ink">
+                    info@aladdinweb.ir
+                  </a>
+                </div>
+              </li>
+              <li className="flex items-start gap-3 py-4">
+                <IconFrame tone="neutral" size="sm">
+                  <Clock size={16} aria-hidden="true" />
+                </IconFrame>
+                <div>
+                  <p className="text-caption text-ink-3">ساعات پاسخ‌گویی</p>
+                  <p className="text-body-sm font-semibold text-ink">{t.utility.hours}</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3 py-4">
+                <IconFrame tone="neutral" size="sm">
+                  <MapPin size={16} aria-hidden="true" />
+                </IconFrame>
+                <div>
+                  <p className="text-caption text-ink-3">نشانی دفتر</p>
+                  <p className="text-body-sm text-ink-2">{t.footer.address}</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="lg:col-span-7">
+            <Card padding="lg">
+              {state === 'sent' ? (
+                <div className="flex flex-col items-start gap-4 py-8">
+                  <span className="inline-flex size-11 items-center justify-center rounded-md border border-success-line bg-success text-success-ink">
+                    <Check size={20} aria-hidden="true" />
+                  </span>
+                  <h3 className="text-title-3">{t.forms.successTitle}</h3>
+                  <p className="text-body-sm text-ink-2">{t.forms.successDesc}</p>
+                  <Button tone="neutral" emphasis="outline" size="sm" onClick={() => setState('idle')}>
+                    {t.forms.close}
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={submit} noValidate className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-2">
+                    <Badge tone="brand" variant="square" className="w-fit">
+                      {t.utility.responseTime}
+                    </Badge>
+                    <h3 className="text-title-3">{t.actions.proposal}</h3>
+                  </div>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Field id="contact-name" label={t.forms.name} required error={errors.name}>
+                      {fieldProps => (
+                        <input
+                          {...fieldProps}
+                          autoComplete="name"
+                          placeholder={t.forms.namePh}
+                          value={values.name}
+                          onChange={event => setValues(v => ({ ...v, name: event.target.value }))}
+                        />
+                      )}
+                    </Field>
+
+                    <Field
+                      id="contact-phone"
+                      label={t.forms.phone}
+                      required
+                      ltrInput
+                      error={errors.phone}
+                      hint={t.forms.phonePh}
+                    >
+                      {fieldProps => (
+                        <input
+                          {...fieldProps}
+                          type="tel"
+                          inputMode="tel"
+                          autoComplete="tel"
+                          value={values.phone}
+                          onChange={event => setValues(v => ({ ...v, phone: event.target.value }))}
+                        />
+                      )}
+                    </Field>
+                  </div>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <Field id="contact-email" label={`${t.forms.email} (${t.forms.optional})`} ltrInput>
+                      {fieldProps => (
+                        <input
+                          {...fieldProps}
+                          type="email"
+                          inputMode="email"
+                          autoComplete="email"
+                          placeholder={t.forms.emailPh}
+                          value={values.email}
+                          onChange={event => setValues(v => ({ ...v, email: event.target.value }))}
+                        />
+                      )}
+                    </Field>
+
+                    <Field id="contact-service" label={t.forms.service}>
+                      {fieldProps => (
+                        <select
+                          {...fieldProps}
+                          value={values.service}
+                          onChange={event => setValues(v => ({ ...v, service: event.target.value }))}
+                          className={`${fieldProps.className} appearance-none`}
+                        >
+                          <option value="corporate">{t.nav.svcCorporate}</option>
+                          <option value="ecommerce">{t.nav.svcEcommerce}</option>
+                          <option value="services">{t.nav.svcServices}</option>
+                          <option value="portal">{t.nav.svcPortal}</option>
+                        </select>
+                      )}
+                    </Field>
+                  </div>
+
+                  <Field id="contact-details" label={`${t.forms.details} (${t.forms.optional})`}>
+                    {fieldProps => (
+                      <textarea
+                        {...fieldProps}
+                        rows={4}
+                        placeholder={t.forms.detailsPh}
+                        value={values.details}
+                        onChange={event => setValues(v => ({ ...v, details: event.target.value }))}
+                      />
+                    )}
+                  </Field>
+
+                  <Button tone="brand" size="lg" type="submit" disabled={state === 'sending'}>
+                    {state === 'sending' ? t.actions.sending : t.actions.submit}
+                  </Button>
+
+                  <p className="border-t border-line pt-4 text-caption text-ink-4">{t.forms.privacy}</p>
+                </form>
+              )}
+            </Card>
+          </div>
+        </div>
+      </Section>
+    </>
   );
 };

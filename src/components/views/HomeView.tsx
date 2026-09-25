@@ -1,109 +1,60 @@
-import React from 'react';
-import { PageId, LocaleKey, ProjectItem } from '../../types';
-import { HeroSection } from '../marketing/HeroSection';
-import { LiveTicker } from '../marketing/LiveTicker';
-import { EcommerceShowcase } from '../marketing/EcommerceShowcase';
-import { ServicesGrid } from '../marketing/ServicesGrid';
-import { TemplatesShowcase } from '../marketing/TemplatesShowcase';
-import { CaseStudiesSection } from '../marketing/CaseStudiesSection';
-import { ArchitectureSection } from '../marketing/ArchitectureSection';
-import { PricingSection } from '../marketing/PricingSection';
-import { TestimonialsSection } from '../marketing/TestimonialsSection';
-import { BlogSection } from '../marketing/BlogSection';
-import { FaqSection } from '../marketing/FaqSection';
-import { CtaSection } from '../marketing/CtaSection';
+import * as React from 'react';
+import type { LocaleKey, PageId, ProjectItem } from '../../types';
+import { Hero } from '../sections/Hero';
+import { TrustStrip } from '../sections/TrustStrip';
+import { ServicesMatrix } from '../sections/ServicesMatrix';
+import { WorkShowcase } from '../sections/WorkShowcase';
+import { ProcessSection } from '../sections/ProcessSection';
+import { PricingSection } from '../sections/PricingSection';
+import { TestimonialsSection } from '../sections/TestimonialsSection';
+import { InsightsSection } from '../sections/InsightsSection';
+import { FaqSection } from '../sections/FaqSection';
+import { CtaSection } from '../sections/CtaSection';
 
-interface HomeViewProps {
-  currentLocale: LocaleKey;
-  isLightMode: boolean;
+/**
+ * Home page
+ * --------------------------------------------------------------------------
+ * Section order follows the buying decision, not a feature list:
+ *   1. argument + immediate way to start a conversation   (Hero)
+ *   2. proof that others trusted us                        (TrustStrip)
+ *   3. what we sell, comparable side by side               (ServicesMatrix)
+ *   4. evidence with measured numbers                      (WorkShowcase)
+ *   5. how the work runs                                   (ProcessSection)
+ *   6. what it costs                                       (PricingSection)
+ *   7. human confirmation                                  (Testimonials)
+ *   8. expertise                                           (Insights)
+ *   9. remaining objections                                (Faq)
+ *  10. one closing action                                  (Cta)
+ *
+ * Exactly one background change per two sections keeps the page calm to scan.
+ */
+export interface HomeViewProps {
+  locale: LocaleKey;
   onNavigate: (page: PageId) => void;
+  onOpenConsult: () => void;
   onSelectProject: (project: ProjectItem) => void;
-  onOpenConsultModal: () => void;
+  hotline: string;
+  whatsapp: string;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
-  currentLocale,
-  isLightMode,
+  locale,
   onNavigate,
+  onOpenConsult,
   onSelectProject,
-  onOpenConsultModal,
-}) => {
-  return (
-    <div className="w-full flex flex-col">
-      {/* 1. Hero & Interactive Consultation Widget */}
-      <HeroSection
-        currentLocale={currentLocale}
-        isLightMode={isLightMode}
-        onNavigate={onNavigate}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 2. Live Operational Uptime & Performance Ticker */}
-      <LiveTicker
-        isLightMode={isLightMode}
-        onSelectProject={onSelectProject}
-        onNavigate={onNavigate}
-      />
-
-      {/* 3. High-Tech Animated E-Commerce Showcase */}
-      <EcommerceShowcase
-        currentLocale={currentLocale}
-        onNavigate={onNavigate}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 4. 6 Solution Bento Cards */}
-      <ServicesGrid
-        isLightMode={isLightMode}
-        onNavigate={onNavigate}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 5. Interactive Templates & Live Previews */}
-      <TemplatesShowcase
-        isLightMode={isLightMode}
-        onPreviewTemplate={onSelectProject}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 6. Real Projects & Case Studies (Adak Steel, etc.) */}
-      <CaseStudiesSection
-        isLightMode={isLightMode}
-        onSelectProject={onSelectProject}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 7. Technical Architecture Pipeline & Comparison Table */}
-      <ArchitectureSection isLightMode={isLightMode} />
-
-      {/* 8. Transparent 3-Tier Pricing Packages */}
-      <PricingSection
-        isLightMode={isLightMode}
-        onNavigate={onNavigate}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 9. Verified Executive Testimonials */}
-      <TestimonialsSection isLightMode={isLightMode} />
-
-      {/* 10. Knowledge Blog & Articles */}
-      <BlogSection
-        isLightMode={isLightMode}
-        onNavigate={onNavigate}
-      />
-
-      {/* 11. FAQ Accordion */}
-      <FaqSection
-        currentLocale={currentLocale}
-        isLightMode={isLightMode}
-        onOpenConsultModal={onOpenConsultModal}
-      />
-
-      {/* 12. Final High-Conversion Consultation & Instant Callback */}
-      <CtaSection
-        currentLocale={currentLocale}
-        isLightMode={isLightMode}
-      />
-    </div>
-  );
-};
+  hotline,
+  whatsapp,
+}) => (
+  <>
+    <Hero locale={locale} onNavigate={onNavigate} onOpenConsult={onOpenConsult} hotline={hotline} />
+    <TrustStrip locale={locale} />
+    <ServicesMatrix locale={locale} onNavigate={onNavigate} onOpenConsult={onOpenConsult} />
+    <WorkShowcase locale={locale} onNavigate={onNavigate} onOpenPreview={onSelectProject} />
+    <ProcessSection locale={locale} onNavigate={onNavigate} />
+    <PricingSection locale={locale} onNavigate={onNavigate} onOpenConsult={onOpenConsult} />
+    <TestimonialsSection locale={locale} />
+    <InsightsSection locale={locale} onNavigate={onNavigate} />
+    <FaqSection locale={locale} onOpenConsult={onOpenConsult} />
+    <CtaSection locale={locale} onOpenConsult={onOpenConsult} hotline={hotline} whatsapp={whatsapp} />
+  </>
+);

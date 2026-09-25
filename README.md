@@ -47,6 +47,30 @@ src/
   data/                    # i18n, sectionsI18n, projects, services, templates, articles
 ```
 
+
+## Design system
+
+The interface is built from a token-first design system rather than page-level
+styling. Full documentation lives in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) and in
+the product itself at `/design-system` (linked from the header menu).
+
+```
+src/design-system/
+  tokens.css      primitives → semantic tokens (light + dark) → Tailwind theme bridge
+  tokens.ts       typed token API (space, radius, grid, motion, z-index)
+  primitives.tsx  Button, Badge, Card, Section, SectionHeading, Stat, Field, Meter, Disclosure, IconFrame
+src/app/          information architecture, i18n copy, page metadata
+src/components/   chrome (header/footer/mobile nav) · sections (home) · views (pages) · modals · widgets
+```
+
+Key properties:
+
+- **Three token layers** with one-way references; components read semantic tokens only.
+- **Light and dark themes** from the same class list — one `dark` class on `<html>`.
+- **RTL-first**, logical CSS properties, localised digits for `fa`/`ar`, isolated Latin runs for phone numbers, domains and codes.
+- **WCAG 2.2 AA** encoded in the tokens and primitives: 4.5:1 text contrast, 2px focus rings, 44px targets, focus never hidden behind the sticky header.
+- **Persian typography** tuned for the script: Vazirmatn, `letter-spacing: 0`, body line-height 1.8–1.85.
+
 This app is fully client-side; no API key or server is required to run it.
 `env.example` documents the optional `GEMINI_API_KEY` / `APP_URL` variables used by the
 original AI Studio deployment.

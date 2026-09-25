@@ -3,17 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { PageId, LocaleKey, ProjectItem } from './types';
+import * as React from 'react';
+import type { LocaleKey, PageId, ProjectItem } from './types';
 import { I18N_DATA } from './data/i18n';
-import { TopBar } from './components/layout/TopBar';
-import { Header } from './components/layout/Header';
-import { Footer } from './components/layout/Footer';
+import { PAGE_SLUG, pageFromLocation } from './app/navigation';
+import { ui } from './app/i18n';
+import { UtilityBar } from './components/chrome/UtilityBar';
+import { SiteHeader } from './components/chrome/SiteHeader';
+import { SiteFooter } from './components/chrome/SiteFooter';
+import { MobileNav } from './components/chrome/MobileNav';
+import { MobileActionBar } from './components/chrome/MobileActionBar';
 import { HomeView } from './components/views/HomeView';
 import { ServicesView } from './components/views/ServicesView';
 import { PortfolioView } from './components/views/PortfolioView';
 import { TemplatesView } from './components/views/TemplatesView';
-import { PricingCalculatorView } from './components/views/PricingCalculatorView';
+import { PricingView } from './components/views/PricingView';
+import { ProcessView } from './components/views/ProcessView';
 import { BlogView } from './components/views/BlogView';
 import { ContactView } from './components/views/ContactView';
 import { CmsDesignSystemView } from './components/views/CmsDesignSystemView';
@@ -23,254 +28,332 @@ import { SlaGuaranteeView } from './components/views/SlaGuaranteeView';
 import { PortfolioPreviewModal } from './components/modals/PortfolioPreviewModal';
 import { QuickConsultModal } from './components/modals/QuickConsultModal';
 import { ChatbotWidget } from './components/widgets/ChatbotWidget';
-import { MobileBottomBar } from './components/layout/MobileBottomBar';
-import { MobileDrawer } from './components/layout/MobileDrawer';
 
+const THEME_KEY = 'aladdin.theme';
+const LOCALE_KEY = 'aladdin.locale';
+
+/**
+ * Application shell
+ * --------------------------------------------------------------------------
+ * Owns exactly four pieces of state — page, locale, theme and the two overlays —
+ * and delegates every visual decision to the design system. Navigation writes to
+ * the address bar so any view can be shared or bookmarked.
+ */
 export default function App() {
-  // Locale State with URL ?lang= parsing and sync
-  const [currentLocale, setCurrentLocale] = useState<LocaleKey>(() => {
+  /* ------------------------------- locale ------------------------------- */
+  const [locale, setLocale] = React.useState<LocaleKey>(() => {
     try {
-      const params = new URLSearchParams(window.location.search);
-      const langParam = params.get('lang') as LocaleKey;
-      if (langParam && I18N_DATA[langParam]) {
-        return langParam;
-      }
+      const fromUrl = new URLSearchParams(window.location.search).get('lang') as LocaleKey | null;
+      if (fromUrl && I18N_DATA[fromUrl]) return fromUrl;
+      const stored = window.localStorage.getItem(LOCALE_KEY) as LocaleKey | null;
+      if (stored && I18N_DATA[stored]) return stored;
     } catch {
-      // fallback
+      /* storage unavailable — fall through to the default locale */
     }
     return 'fa';
   });
 
-  // Current page routing state
-  const [currentPage, setCurrentPage] = useState<PageId>('home');
+  /* ------------------------------- routing ------------------------------ */
+  const [page, setPage] = React.useState<PageId>(() =>
+    pageFromLocation(window.location.pathname, window.location.search),
+  );
 
-  // Light / Dark mode state
-  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+  /* -------------------------------- theme ------------------------------- */
+  const [isLight, setIsLight] = React.useState<boolean>(() => {
     try {
-      return localStorage.getItem('aladdin_theme') === 'light';
+      const stored = window.localStorage.getItem(THEME_KEY);
+      if (stored) return stored === 'light';
+      return !window.matchMedia('(prefers-color-scheme: dark)').matches;
     } catch {
-      return false;
+      return true;
     }
   });
 
-  // Modals state
-  const [selectedPreviewProject, setSelectedPreviewProject] = useState<ProjectItem | null>(null);
-  const [targetProjectId, setTargetProjectId] = useState<string | null>(null);
-  const [isConsultModalOpen, setIsConsultModalOpen] = useState(false);
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  /* ------------------------------- overlays ----------------------------- */
+  const [previewProject, setPreviewProject] = React.useState<ProjectItem | null>(null);
+  const [consultOpen, setConsultOpen] = React.useState(false);
+  const [navOpen, setNavOpen] = React.useState(false);
 
-  // Sync HTML attributes (dir, lang, theme class) when locale or theme changes
-  useEffect(() => {
-    const doc = document.documentElement;
-    const isRtl = I18N_DATA[currentLocale].dir === 'rtl';
-    doc.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
-    doc.setAttribute('lang', currentLocale);
+  const t = ui(locale);
 
-    if (isLightMode) {
-      doc.classList.remove('dark');
-      doc.classList.add('light');
-    } else {
-      doc.classList.remove('light');
-      doc.classList.add('dark');
-    }
-  }, [currentLocale, isLightMode]);
+  /* document-level side effects: direction, language, theme, title, history */
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('dir', t.dir);
+    root.setAttribute('lang', locale);
+    root.classList.toggle('dark', !isLight);
+    root.classList.toggle('light', isLight);
+  }, [locale, isLight, t.dir]);
 
-  const handleLocaleChange = (locale: LocaleKey) => {
-    setCurrentLocale(locale);
+  React.useEffect(() => {
+    document.title = `${t.pages[page].title} — علاءالدین DXP`;
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.setAttribute('content', t.pages[page].description);
+  }, [page, t]);
+
+  /* browser back/forward keeps the shell in sync with the address bar */
+  React.useEffect(() => {
+    const onPopState = () => setPage(pageFromLocation(window.location.pathname, window.location.search));
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const navigate = React.useCallback((next: PageId) => {
+    setPage(current => {
+      if (current === next) return current;
+      try {
+        const url = new URL(window.location.href);
+        url.pathname = PAGE_SLUG[next];
+        url.searchParams.delete('p');
+        window.history.pushState({ page: next }, '', url.toString());
+      } catch {
+        /* history unavailable (sandboxed preview) — state change is enough */
+      }
+      return next;
+    });
+    setNavOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const changeLocale = (next: LocaleKey) => {
+    setLocale(next);
     try {
+      window.localStorage.setItem(LOCALE_KEY, next);
       const url = new URL(window.location.href);
-      url.searchParams.set('lang', locale);
-      window.history.pushState({}, '', url.toString());
+      url.searchParams.set('lang', next);
+      window.history.replaceState({}, '', url.toString());
     } catch {
-      // ignore
+      /* ignore */
     }
   };
 
-  const handleThemeToggle = () => {
-    setIsLightMode(prev => {
-      const next = !prev;
+  const toggleTheme = () => {
+    setIsLight(current => {
+      const next = !current;
       try {
-        localStorage.setItem('aladdin_theme', next ? 'light' : 'dark');
+        window.localStorage.setItem(THEME_KEY, next ? 'light' : 'dark');
       } catch {
-        // ignore
+        /* ignore */
       }
       return next;
     });
   };
 
-  const handleNavigate = (page: PageId) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const hotline = I18N_DATA[locale].marketContact.hotlineFormatted.replace(/[\s‑-]/g, '');
+  const whatsapp = I18N_DATA[locale].marketContact.whatsapp;
+
+  const openPreview = (project: ProjectItem) => setPreviewProject(project);
+
+  /* ------------------------------ rendering ----------------------------- */
+  const renderPage = () => {
+    switch (page) {
+      case 'home':
+        return (
+          <HomeView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            onSelectProject={openPreview}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'services':
+      case 'corporate-web-design':
+      case 'ecommerce-web-design':
+      case 'services-web-design':
+      case 'custom-portal-development':
+        return (
+          <ServicesView
+            pageId={page}
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'portfolio':
+        return (
+          <PortfolioView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            onSelectProject={openPreview}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'templates':
+        return (
+          <TemplatesView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'pricing-calculator':
+        return (
+          <PricingView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'process':
+        return (
+          <ProcessView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'knowledge-blog':
+        return (
+          <BlogView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'speed-audit':
+        return (
+          <SpeedAuditView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'cms-simulator':
+        return (
+          <CmsSimulatorView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'sla-guarantee':
+        return (
+          <SlaGuaranteeView
+            locale={locale}
+            onNavigate={navigate}
+            onOpenConsult={() => setConsultOpen(true)}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+
+      case 'cms-design-system':
+        return <CmsDesignSystemView locale={locale} onNavigate={navigate} />;
+
+      case 'about-contact':
+      default:
+        return (
+          <ContactView
+            locale={locale}
+            onNavigate={navigate}
+            hotline={hotline}
+            whatsapp={whatsapp}
+          />
+        );
+    }
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
-      isLightMode ? 'bg-[#f8fafc] text-[#0f172a]' : 'bg-[#0a1228] text-[#dbe1ff]'
-    }`}>
-      {/* 1. Top Informational Bar */}
-      <TopBar
-        currentLocale={currentLocale}
-        onLocaleChange={handleLocaleChange}
-        isLightMode={isLightMode}
-        onThemeToggle={handleThemeToggle}
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-toast focus:rounded-sm focus:border focus:border-line focus:bg-surface focus:px-4 focus:py-2 focus:text-body-sm focus:shadow-md"
+      >
+        {t.common.skipToContent}
+      </a>
+
+      <UtilityBar locale={locale} onLocaleChange={changeLocale} hotline={hotline} />
+
+      <SiteHeader
+        currentPage={page}
+        locale={locale}
+        isLight={isLight}
+        onNavigate={navigate}
+        onThemeToggle={toggleTheme}
+        onOpenMobileNav={() => setNavOpen(true)}
+        onOpenConsult={() => setConsultOpen(true)}
+        hotline={hotline}
       />
 
-      {/* 2. Main Sticky Header with Mega Menu */}
-      <Header
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
-        currentLocale={currentLocale}
-        isLightMode={isLightMode}
-        onOpenConsultModal={() => setIsConsultModalOpen(true)}
-        onOpenMobileDrawer={() => setIsMobileDrawerOpen(true)}
-      />
-
-      {/* 3. Main Views */}
-      <main className="flex-1 w-full pb-24 xl:pb-0">
-        {currentPage === 'home' && (
-          <HomeView
-            currentLocale={currentLocale}
-            isLightMode={isLightMode}
-            onNavigate={handleNavigate}
-            onSelectProject={(proj) => setSelectedPreviewProject(proj)}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-          />
-        )}
-
-        {(currentPage === 'services' || currentPage.includes('-web-design')) && (
-          <ServicesView
-            pageId={currentPage}
-            isLightMode={isLightMode}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-            onNavigate={handleNavigate}
-          />
-        )}
-
-        {currentPage === 'portfolio' && (
-          <PortfolioView
-            isLightMode={isLightMode}
-            onSelectProject={(proj) => setSelectedPreviewProject(proj)}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-            targetProjectId={targetProjectId}
-          />
-        )}
-
-        {currentPage === 'templates' && (
-          <TemplatesView
-            isLightMode={isLightMode}
-            onPreviewTemplate={(proj) => setSelectedPreviewProject(proj)}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-          />
-        )}
-
-        {currentPage === 'pricing-calculator' && (
-          <PricingCalculatorView
-            currentLocale={currentLocale}
-            isLightMode={isLightMode}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-          />
-        )}
-
-        {currentPage === 'speed-audit' && (
-          <SpeedAuditView
-            currentLocale={currentLocale}
-            onOpenConsult={() => setIsConsultModalOpen(true)}
-            onSelectPage={handleNavigate}
-          />
-        )}
-
-        {currentPage === 'cms-simulator' && (
-          <CmsSimulatorView
-            currentLocale={currentLocale}
-            onOpenConsult={() => setIsConsultModalOpen(true)}
-            onSelectPage={handleNavigate}
-          />
-        )}
-
-        {currentPage === 'sla-guarantee' && (
-          <SlaGuaranteeView
-            currentLocale={currentLocale}
-            onOpenConsult={() => setIsConsultModalOpen(true)}
-            onSelectPage={handleNavigate}
-          />
-        )}
-
-        {currentPage === 'knowledge-blog' && (
-          <BlogView
-            isLightMode={isLightMode}
-            onOpenConsultModal={() => setIsConsultModalOpen(true)}
-          />
-        )}
-
-        {currentPage === 'cms-design-system' && (
-          <CmsDesignSystemView
-            isLightMode={isLightMode}
-            currentLocale={currentLocale}
-          />
-        )}
-
-        {currentPage === 'about-contact' && (
-          <ContactView
-            isLightMode={isLightMode}
-            currentLocale={currentLocale}
-          />
-        )}
+      <main id="main" className="flex-1 pb-16 lg:pb-0">
+        {renderPage()}
       </main>
 
-      {/* 4. Full Footer */}
-      <Footer
-        onNavigate={handleNavigate}
-        currentLocale={currentLocale}
-        isLightMode={isLightMode}
+      <SiteFooter
+        locale={locale}
+        currentPage={page}
+        onNavigate={navigate}
+        onOpenConsult={() => setConsultOpen(true)}
+        hotline={hotline}
+        whatsapp={whatsapp}
+        year={String(new Date().getFullYear())}
       />
 
-      {/* 5. Live Responsive Preview Modal (Desktop / Tablet / Mobile) */}
+      <MobileActionBar
+        currentPage={page}
+        locale={locale}
+        onNavigate={navigate}
+        onOpenMenu={() => setNavOpen(true)}
+        onOpenConsult={() => setConsultOpen(true)}
+      />
+
+      <MobileNav
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        currentPage={page}
+        locale={locale}
+        isLight={isLight}
+        onNavigate={navigate}
+        onLocaleChange={changeLocale}
+        onThemeToggle={toggleTheme}
+        onOpenConsult={() => setConsultOpen(true)}
+        hotline={hotline}
+      />
+
       <PortfolioPreviewModal
-        project={selectedPreviewProject}
-        onClose={() => setSelectedPreviewProject(null)}
-        onNavigate={handleNavigate}
-        currentLocale={currentLocale}
-        onGoToProjectPage={(projId) => {
-          setSelectedPreviewProject(null);
-          setTargetProjectId(projId);
-          handleNavigate('portfolio');
-        }}
+        project={previewProject}
+        onClose={() => setPreviewProject(null)}
+        onNavigate={navigate}
+        currentLocale={locale}
       />
 
-      {/* 6. Quick Consultation / Prototype Request Modal */}
       <QuickConsultModal
-        isOpen={isConsultModalOpen}
-        onClose={() => setIsConsultModalOpen(false)}
-        currentLocale={currentLocale}
+        isOpen={consultOpen}
+        onClose={() => setConsultOpen(false)}
+        currentLocale={locale}
       />
 
-      {/* 7. Floating Intelligent Multilingual Chatbot */}
       <ChatbotWidget
-        currentLocale={currentLocale}
-        onNavigate={handleNavigate}
-        onOpenConsultModal={() => setIsConsultModalOpen(true)}
-      />
-
-      {/* 8. Slide-out Mobile Navigation Drawer */}
-      <MobileDrawer
-        isOpen={isMobileDrawerOpen}
-        onClose={() => setIsMobileDrawerOpen(false)}
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
-        currentLocale={currentLocale}
-        onLocaleChange={handleLocaleChange}
-        isLightMode={isLightMode}
-        onThemeToggle={handleThemeToggle}
-        onOpenConsultModal={() => setIsConsultModalOpen(true)}
-      />
-
-      {/* 9. Persistent Mobile Bottom Navigation Bar */}
-      <MobileBottomBar
-        currentPage={currentPage}
-        onNavigate={handleNavigate}
-        onOpenConsultModal={() => setIsConsultModalOpen(true)}
-        isLightMode={isLightMode}
-        currentLocale={currentLocale}
+        currentLocale={locale}
+        onNavigate={navigate}
+        onOpenConsultModal={() => setConsultOpen(true)}
       />
     </div>
   );

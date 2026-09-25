@@ -1,0 +1,594 @@
+/* ==========================================================================
+   Aladdin DXP — Design System
+   Layer 1: TOKEN FOUNDATION
+   --------------------------------------------------------------------------
+   Architecture: three tiers, strictly one-directional references
+     primitive  →  raw values, named for what they are  (ink-900, space-4)
+     semantic   →  intent, named for the job they do    (bg-surface, text-muted)
+     component  →  bound to one component               (--ds-btn-…)
+
+   Rules enforced by this file:
+     · kebab-case, one delimiter, general → specific naming
+     · no appearance words in the semantic tier (no "blue", no "dark")
+     · components never read primitives directly
+     · every semantic pair documents its contrast target (WCAG 2.2 AA)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PRIMITIVES — colour
+   Neutral ramp is a cool grey (professional print-like cast).
+   Brand ramp is indigo-blue: the single functional accent of the product.
+   Support ramps are reserved for data + status, never for decoration.
+   -------------------------------------------------------------------------- */
+:root {
+  /* neutral ------------------------------------------------------------------ */
+  --ds-primitive-ink-25: #fcfcfd;
+  --ds-primitive-ink-50: #f9fafb;
+  --ds-primitive-ink-100: #f2f4f7;
+  --ds-primitive-ink-200: #eaecf0;
+  --ds-primitive-ink-300: #d0d5dd;
+  --ds-primitive-ink-400: #98a2b3;
+  --ds-primitive-ink-500: #667085;
+  --ds-primitive-ink-600: #475467;
+  --ds-primitive-ink-700: #344054;
+  --ds-primitive-ink-800: #1d2939;
+  --ds-primitive-ink-900: #101828;
+  --ds-primitive-ink-950: #0a0f1c;
+  --ds-primitive-white: #ffffff;
+  --ds-primitive-navy-900: #0a1228; /* heritage brand navy: inverse surfaces */
+  --ds-primitive-navy-950: #060a17;
+
+  /* brand (indigo-blue) ------------------------------------------------------ */
+  --ds-primitive-brand-50: #eef4ff;
+  --ds-primitive-brand-100: #e0eaff;
+  --ds-primitive-brand-200: #c7d7fe;
+  --ds-primitive-brand-300: #a4bcfd;
+  --ds-primitive-brand-400: #8098f9;
+  --ds-primitive-brand-500: #6172f3;
+  --ds-primitive-brand-600: #444ce7;
+  --ds-primitive-brand-700: #3538cd;
+  --ds-primitive-brand-800: #2d31a6;
+  --ds-primitive-brand-900: #2d3282;
+
+  /* teal — technical / data accent ------------------------------------------ */
+  --ds-primitive-teal-50: #f0fdf9;
+  --ds-primitive-teal-100: #ccfbef;
+  --ds-primitive-teal-500: #15b79e;
+  --ds-primitive-teal-600: #0e9384;
+  --ds-primitive-teal-700: #107569;
+
+  /* status ------------------------------------------------------------------- */
+  --ds-primitive-green-50: #ecfdf3;
+  --ds-primitive-green-600: #039855;
+  --ds-primitive-green-700: #027a48;
+  --ds-primitive-amber-50: #fffaeb;
+  --ds-primitive-amber-500: #f79009;
+  --ds-primitive-amber-600: #dc6803;
+  --ds-primitive-amber-700: #b54708;
+  --ds-primitive-red-50: #fef3f2;
+  --ds-primitive-red-600: #d92d20;
+  --ds-primitive-red-700: #b42318;
+
+  /* --------------------------------------------------------------------------
+     2. PRIMITIVES — scales (space, type, radius, elevation, motion, depth)
+     Space is a 4px base unit; every layout value is a multiple of it.
+     -------------------------------------------------------------------------- */
+  --ds-primitive-space-0: 0;
+  --ds-primitive-space-1: 0.25rem; /*  4 */
+  --ds-primitive-space-2: 0.5rem; /*   8 */
+  --ds-primitive-space-3: 0.75rem; /* 12 */
+  --ds-primitive-space-4: 1rem; /*    16 */
+  --ds-primitive-space-5: 1.25rem; /* 20 */
+  --ds-primitive-space-6: 1.5rem; /*  24 */
+  --ds-primitive-space-8: 2rem; /*    32 */
+  --ds-primitive-space-10: 2.5rem;
+  --ds-primitive-space-12: 3rem; /*   48 */
+  --ds-primitive-space-16: 4rem; /*   64 */
+  --ds-primitive-space-20: 5rem; /*   80 */
+  --ds-primitive-space-24: 6rem; /*   96 */
+  --ds-primitive-space-32: 8rem; /*  128 */
+
+  /* vertical rhythm between page sections (responsive, see § base layer) */
+  --ds-space-section-y: 4.5rem; /* 72 */
+  --ds-space-section-y-lg: 7rem; /* 112 */
+  --ds-space-gutter: 1.5rem; /*    24 */
+  --ds-space-page-x: 1rem; /*      16 */
+
+  --ds-primitive-radius-xs: 0.375rem; /*  6 */
+  --ds-primitive-radius-sm: 0.5rem; /*    8 */
+  --ds-primitive-radius-md: 0.625rem; /* 10 */
+  --ds-primitive-radius-lg: 0.875rem; /* 14 */
+  --ds-primitive-radius-xl: 1.125rem; /* 18 */
+  --ds-primitive-radius-full: 999px;
+
+  /* elevation is used only to signal layering, never to decorate */
+  --ds-primitive-shadow-xs: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+  --ds-primitive-shadow-sm: 0 1px 3px 0 rgb(16 24 40 / 0.08), 0 1px 2px -1px rgb(16 24 40 / 0.06);
+  --ds-primitive-shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.08), 0 2px 4px -2px rgb(16 24 40 / 0.04);
+  --ds-primitive-shadow-lg: 0 12px 24px -6px rgb(16 24 40 / 0.10), 0 4px 8px -4px rgb(16 24 40 / 0.05);
+  --ds-primitive-shadow-xl: 0 24px 48px -12px rgb(16 24 40 / 0.18);
+
+  --ds-primitive-duration-instant: 90ms;
+  --ds-primitive-duration-fast: 140ms;
+  --ds-primitive-duration-base: 200ms;
+  --ds-primitive-duration-slow: 320ms;
+  --ds-primitive-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ds-primitive-ease-entrance: cubic-bezier(0.3, 0, 0, 1);
+  --ds-primitive-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  --ds-primitive-z-base: 0;
+  --ds-primitive-z-sticky: 30;
+  --ds-primitive-z-dropdown: 35;
+  --ds-primitive-z-drawer: 40;
+  --ds-primitive-z-modal: 50;
+  --ds-primitive-z-toast: 60;
+
+  --ds-primitive-font-sans: 'Vazirmatn', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --ds-primitive-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  --ds-primitive-weight-regular: 400;
+  --ds-primitive-weight-medium: 500;
+  --ds-primitive-weight-semibold: 600;
+  --ds-primitive-weight-bold: 700;
+}
+
+/* --------------------------------------------------------------------------
+   3. SEMANTIC TOKENS — light theme (default)
+   Contrast targets are documented inline; all pairs are verified at AA.
+   -------------------------------------------------------------------------- */
+:root,
+.light {
+  color-scheme: light;
+
+  /* surfaces --------------------------------------------------------------- */
+  --ds-color-bg-canvas: var(--ds-primitive-ink-25); /* page ground           */
+  --ds-color-bg-surface: var(--ds-primitive-white); /* cards, sheets         */
+  --ds-color-bg-raised: var(--ds-primitive-white);
+  --ds-color-bg-subtle: var(--ds-primitive-ink-50); /* quiet bands           */
+  --ds-color-bg-muted: var(--ds-primitive-ink-100); /* inset wells           */
+  --ds-color-bg-inset: var(--ds-primitive-ink-100);
+  --ds-color-bg-inverse: var(--ds-primitive-navy-900);
+  --ds-color-bg-inverse-soft: #111a36;
+  --ds-color-bg-brand-subtle: var(--ds-primitive-brand-50);
+  --ds-color-bg-brand: var(--ds-primitive-brand-700);
+  --ds-color-bg-brand-hover: var(--ds-primitive-brand-800);
+  --ds-color-bg-neutral-hover: var(--ds-primitive-ink-100);
+  --ds-color-bg-overlay: rgb(10 15 28 / 0.55); /* scrims                   */
+
+  /* deep band — a deliberately dark surface in BOTH themes, used for the
+     closing call to action. Its own token group keeps contrast guarantees
+     independent from the inverse (theme-flipping) surface. */
+  --ds-color-bg-deep: #0b1224;
+  --ds-color-text-on-deep: #eef2fb;
+  --ds-color-text-on-deep-muted: #a9b4cd;
+  --ds-color-text-on-deep-accent: #a4bcfd; /* 7.1:1 on the deep band */
+  --ds-color-border-on-deep: rgb(255 255 255 / 0.14);
+  --ds-color-bg-skeleton: var(--ds-primitive-ink-200);
+
+  /* text — ratio measured against bg-canvas / bg-surface ------------------- */
+  --ds-color-text-primary: var(--ds-primitive-ink-900); /* 15.9:1           */
+  --ds-color-text-secondary: var(--ds-primitive-ink-600); /* 7.4:1          */
+  --ds-color-text-muted: var(--ds-primitive-ink-500); /* 4.8:1 body-safe   */
+  --ds-color-text-faint: var(--ds-primitive-ink-400); /* non-text only     */
+  --ds-color-text-inverse: var(--ds-primitive-ink-25);
+  --ds-color-text-inverse-muted: #a5b0c9; /* 7.1:1 on navy-900          */
+  --ds-color-text-brand: var(--ds-primitive-brand-700); /* 6.9:1          */
+  --ds-color-text-on-brand: var(--ds-primitive-white); /* 8.9:1            */
+  --ds-color-text-success: var(--ds-primitive-green-700);
+  --ds-color-text-warning: var(--ds-primitive-amber-700);
+  --ds-color-text-danger: var(--ds-primitive-red-700);
+  --ds-color-text-on-status: var(--ds-primitive-white);
+
+  /* borders ---------------------------------------------------------------- */
+  --ds-color-border-subtle: var(--ds-primitive-ink-200); /* hairline         */
+  --ds-color-border-default: var(--ds-primitive-ink-300);
+  --ds-color-border-strong: var(--ds-primitive-ink-400);
+  --ds-color-border-inverse: rgb(255 255 255 / 0.12);
+  --ds-color-border-focus: var(--ds-primitive-brand-600); /* 3:1+ vs ground */
+
+  /* status surfaces -------------------------------------------------------- */
+  --ds-color-bg-success-subtle: var(--ds-primitive-green-50);
+  --ds-color-bg-warning-subtle: var(--ds-primitive-amber-50);
+  --ds-color-bg-danger-subtle: var(--ds-primitive-red-50);
+  --ds-color-bg-info-subtle: var(--ds-primitive-brand-50);
+  --ds-color-border-success: #abefc6;
+  --ds-color-border-warning: #fedf89;
+  --ds-color-border-danger: #fecdca;
+  --ds-color-border-info: var(--ds-primitive-brand-200);
+
+  /* data-visualisation (charts, meters) ------------------------------------ */
+  --ds-color-data-1: var(--ds-primitive-brand-600);
+  --ds-color-data-2: var(--ds-primitive-teal-600);
+  --ds-color-data-3: var(--ds-primitive-amber-500);
+  --ds-color-data-4: var(--ds-primitive-ink-700);
+  --ds-color-data-track: var(--ds-primitive-ink-200);
+
+  /* elevation aliases ------------------------------------------------------ */
+  --ds-elevation-flat: none;
+  --ds-elevation-raised: var(--ds-primitive-shadow-xs);
+  --ds-elevation-dropdown: var(--ds-primitive-shadow-md);
+  --ds-elevation-overlay: var(--ds-primitive-shadow-xl);
+  --ds-focus-ring: 0 0 0 3px rgb(68 76 231 / 0.28);
+}
+
+/* --------------------------------------------------------------------------
+   4. SEMANTIC TOKENS — dark theme
+   Same roles, re-pointed. No component is aware of the switch.
+   -------------------------------------------------------------------------- */
+.dark {
+  color-scheme: dark;
+
+  --ds-color-bg-canvas: #070b16;
+  --ds-color-bg-surface: #0e1424;
+  --ds-color-bg-raised: #131a2c;
+  --ds-color-bg-subtle: #0b1020;
+  --ds-color-bg-muted: #161e33;
+  --ds-color-bg-inset: #161e33;
+  --ds-color-bg-inverse: var(--ds-primitive-ink-25);
+  --ds-color-bg-inverse-soft: #ffffff;
+  --ds-color-bg-brand-subtle: rgb(97 114 243 / 0.14);
+  --ds-color-bg-brand: var(--ds-primitive-brand-500);
+  --ds-color-bg-brand-hover: var(--ds-primitive-brand-400);
+  --ds-color-bg-neutral-hover: rgb(255 255 255 / 0.06);
+  --ds-color-bg-overlay: rgb(3 6 14 / 0.72);
+
+  --ds-color-bg-deep: #0f1730;
+  --ds-color-text-on-deep: #eef2fb;
+  --ds-color-text-on-deep-muted: #a9b4cd;
+  --ds-color-text-on-deep-accent: #a4bcfd;
+  --ds-color-border-on-deep: rgb(255 255 255 / 0.14);
+  --ds-color-bg-skeleton: #1d2939;
+
+  --ds-color-text-primary: #eef2fb; /* 15.1:1 on canvas                 */
+  --ds-color-text-secondary: #b6c0d6; /* 9.2:1                          */
+  --ds-color-text-muted: #8e9ab5; /* 6.1:1                            */
+  --ds-color-text-faint: #6a7590;
+  --ds-color-text-inverse: var(--ds-primitive-ink-900);
+  --ds-color-text-inverse-muted: var(--ds-primitive-ink-600);
+  --ds-color-text-brand: var(--ds-primitive-brand-300); /* 7.6:1          */
+  --ds-color-text-on-brand: var(--ds-primitive-navy-950);
+  --ds-color-text-success: #75e0a7;
+  --ds-color-text-warning: #fec84b;
+  --ds-color-text-danger: #fda29b;
+  --ds-color-text-on-status: var(--ds-primitive-navy-950);
+
+  --ds-color-border-subtle: #1e2740;
+  --ds-color-border-default: #2b3550;
+  --ds-color-border-strong: #475467;
+  --ds-color-border-inverse: rgb(16 24 40 / 0.12);
+  --ds-color-border-focus: var(--ds-primitive-brand-400);
+
+  --ds-color-bg-success-subtle: rgb(3 152 85 / 0.14);
+  --ds-color-bg-warning-subtle: rgb(220 104 3 / 0.16);
+  --ds-color-bg-danger-subtle: rgb(217 45 32 / 0.14);
+  --ds-color-bg-info-subtle: rgb(97 114 243 / 0.14);
+  --ds-color-border-success: rgb(117 224 167 / 0.28);
+  --ds-color-border-warning: rgb(254 200 75 / 0.28);
+  --ds-color-border-danger: rgb(253 162 155 / 0.28);
+  --ds-color-border-info: rgb(128 152 249 / 0.28);
+
+  --ds-color-data-1: var(--ds-primitive-brand-400);
+  --ds-color-data-2: #2ed3b7;
+  --ds-color-data-3: #fdb022;
+  --ds-color-data-4: #b6c0d6;
+  --ds-color-data-track: #1e2740;
+
+  --ds-elevation-raised: none;
+  --ds-elevation-dropdown: 0 12px 24px -8px rgb(0 0 0 / 0.6);
+  --ds-elevation-overlay: 0 32px 64px -16px rgb(0 0 0 / 0.7);
+  --ds-focus-ring: 0 0 0 3px rgb(128 152 249 / 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   5. THEME BRIDGE — expose semantic tokens to Tailwind v4 utilities
+   `@theme inline` keeps the var() reference intact, so a single class list
+   works in both themes: bg-surface · text-muted · border-line · ring-focus
+   -------------------------------------------------------------------------- */
+@theme inline {
+  --color-canvas: var(--ds-color-bg-canvas);
+  --color-surface: var(--ds-color-bg-surface);
+  --color-raised: var(--ds-color-bg-raised);
+  --color-subtle: var(--ds-color-bg-subtle);
+  --color-muted: var(--ds-color-bg-muted);
+  --color-inset: var(--ds-color-bg-inset);
+  --color-inverse: var(--ds-color-bg-inverse);
+  --color-inverse-soft: var(--ds-color-bg-inverse-soft);
+  --color-overlay: var(--ds-color-bg-overlay);
+  --color-deep: var(--ds-color-bg-deep);
+  --color-on-deep: var(--ds-color-text-on-deep);
+  --color-on-deep-muted: var(--ds-color-text-on-deep-muted);
+  --color-on-deep-accent: var(--ds-color-text-on-deep-accent);
+  --color-deep-line: var(--ds-color-border-on-deep);
+  --color-skeleton: var(--ds-color-bg-skeleton);
+
+  --color-ink: var(--ds-color-text-primary);
+  --color-ink-2: var(--ds-color-text-secondary);
+  --color-ink-3: var(--ds-color-text-muted);
+  --color-ink-4: var(--ds-color-text-faint);
+  --color-ink-inverse: var(--ds-color-text-inverse);
+  --color-ink-inverse-muted: var(--ds-color-text-inverse-muted);
+
+  --color-line: var(--ds-color-border-subtle);
+  --color-line-strong: var(--ds-color-border-default);
+  --color-line-bold: var(--ds-color-border-strong);
+  --color-line-inverse: var(--ds-color-border-inverse);
+  --color-focus: var(--ds-color-border-focus);
+
+  --color-brand: var(--ds-color-bg-brand);
+  --color-brand-hover: var(--ds-color-bg-brand-hover);
+  --color-brand-soft: var(--ds-color-bg-brand-subtle);
+  --color-brand-ink: var(--ds-color-text-brand);
+  --color-on-brand: var(--ds-color-text-on-brand);
+  --color-neutral-hover: var(--ds-color-bg-neutral-hover);
+
+  --color-success: var(--ds-color-bg-success-subtle);
+  --color-success-line: var(--ds-color-border-success);
+  --color-success-ink: var(--ds-color-text-success);
+  --color-warning: var(--ds-color-bg-warning-subtle);
+  --color-warning-line: var(--ds-color-border-warning);
+  --color-warning-ink: var(--ds-color-text-warning);
+  --color-danger: var(--ds-color-bg-danger-subtle);
+  --color-danger-line: var(--ds-color-border-danger);
+  --color-danger-ink: var(--ds-color-text-danger);
+  --color-info: var(--ds-color-bg-info-subtle);
+  --color-info-line: var(--ds-color-border-info);
+
+  --color-data-1: var(--ds-color-data-1);
+  --color-data-2: var(--ds-color-data-2);
+  --color-data-3: var(--ds-color-data-3);
+  --color-data-4: var(--ds-color-data-4);
+  --color-data-track: var(--ds-color-data-track);
+
+  /* type ramp — size / line-height pairs tuned for Persian (1.7–1.9 body) -- */
+  --text-display-1: 2.75rem;
+  --text-display-1--line-height: 1.25;
+  --text-display-1--letter-spacing: 0;
+  --text-display-2: 2.125rem;
+  --text-display-2--line-height: 1.3;
+  --text-display-2--letter-spacing: 0;
+  --text-title-1: 1.75rem;
+  --text-title-1--line-height: 1.35;
+  --text-title-2: 1.375rem;
+  --text-title-2--line-height: 1.45;
+  --text-title-3: 1.125rem;
+  --text-title-3--line-height: 1.5;
+  --text-body-lg: 1.0625rem;
+  --text-body-lg--line-height: 1.85;
+  --text-body: 1rem;
+  --text-body--line-height: 1.85;
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.8;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.7;
+  --text-overline: 0.75rem;
+  --text-overline--line-height: 1.6;
+
+  --font-sans: var(--ds-primitive-font-sans);
+  --font-mono: var(--ds-primitive-font-mono);
+
+  --radius-xs: var(--ds-primitive-radius-xs);
+  --radius-sm: var(--ds-primitive-radius-sm);
+  --radius-md: var(--ds-primitive-radius-md);
+  --radius-lg: var(--ds-primitive-radius-lg);
+  --radius-xl: var(--ds-primitive-radius-xl);
+
+  --shadow-xs: var(--ds-primitive-shadow-xs);
+  --shadow-sm: var(--ds-primitive-shadow-sm);
+  --shadow-md: var(--ds-primitive-shadow-md);
+  --shadow-lg: var(--ds-primitive-shadow-lg);
+  --shadow-xl: var(--ds-primitive-shadow-xl);
+
+  --container-page: 78rem; /* 1248 — reading-optimised content column   */
+  --container-prose: 46rem; /* 736 — long-form article measure           */
+}
+
+/* class-based dark variant: one switch on <html> drives the whole product */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* --------------------------------------------------------------------------
+   6. BASE LAYER — document defaults, focus policy, motion policy
+   -------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* keep focused elements clear of the sticky header (WCAG 2.4.11) */
+    scroll-padding-top: 6.5rem;
+  }
+
+  body {
+    background-color: var(--ds-color-bg-canvas);
+    color: var(--ds-color-text-primary);
+    font-family: var(--ds-primitive-font-sans);
+    font-size: 1rem;
+    line-height: 1.85;
+    font-weight: var(--ds-primitive-weight-regular);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* letter-spacing is always 0 for the connected Persian script */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--ds-primitive-weight-bold);
+    letter-spacing: 0;
+    line-height: 1.35;
+    color: var(--ds-color-text-primary);
+    text-wrap: balance;
+  }
+
+  p, li, dd, blockquote {
+    text-wrap: pretty;
+  }
+
+  /* one focus policy for the entire product */
+  :focus-visible {
+    outline: 2px solid var(--ds-color-border-focus);
+    outline-offset: 2px;
+    border-radius: var(--ds-primitive-radius-xs);
+  }
+
+  ::selection {
+    background-color: var(--ds-color-bg-brand);
+    color: var(--ds-color-text-on-brand);
+  }
+
+  ::placeholder {
+    color: var(--ds-color-text-faint);
+    opacity: 1;
+  }
+
+  /* numerals align in columns; Persian digits come from the font */
+  table,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  img, svg, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  hr {
+    border-color: var(--ds-color-border-subtle);
+  }
+
+  /* respect the user's motion preference — no parallax, no reveals */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* --------------------------------------------------------------------------
+   7. UTILITIES — small, composable, token-driven
+   -------------------------------------------------------------------------- */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--ds-space-page-x);
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* isolated Latin run inside RTL copy (phones, codes, prices in $) */
+@utility ltr-isolate {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+@utility hairline-grid {
+  background-image: linear-gradient(
+    to right,
+    var(--ds-color-border-subtle) 1px,
+    transparent 1px
+  );
+  background-size: 25% 100%;
+}
+
+@utility section-rhythm {
+  padding-block: var(--ds-space-section-y);
+  @media (width >= 48rem) {
+    padding-block: var(--ds-space-section-y-lg);
+  }
+}
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(
+    92deg,
+    var(--ds-color-text-brand) 0%,
+    var(--ds-color-data-2) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes ds-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ds-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes ds-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ds-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@utility animate-rise {
+  animation: ds-rise var(--ds-primitive-duration-slow) var(--ds-primitive-ease-entrance) both;
+}
+
+@utility animate-fade-in {
+  animation: ds-fade var(--ds-primitive-duration-base) var(--ds-primitive-ease-standard) both;
+}
+
+@utility animate-scale-in {
+  animation: ds-scale-in var(--ds-primitive-duration-base) var(--ds-primitive-ease-entrance) both;
+}
+
+/* hairline scrollbars — quiet, theme-aware */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--ds-color-border-default);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--ds-primitive-radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--ds-color-border-strong);
+}
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

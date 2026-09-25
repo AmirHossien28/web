@@ -1,199 +1,186 @@
-import React, { useState } from 'react';
-import { ArticleItem } from '../../types';
+import * as React from 'react';
+import { ArrowRight, CalendarDays, Eye, Timer, X } from 'lucide-react';
+import type { LocaleKey, PageId } from '../../types';
 import { ARTICLES_DATA } from '../../data/articles';
+import type { ArticleItem } from '../../types';
+import { Badge, Button, Section } from '../../design-system/primitives';
+import { cx } from '../../design-system/tokens';
+import { PageHeader } from '../chrome/PageHeader';
+import { CtaSection } from '../sections/CtaSection';
+import { homeCopy } from '../../app/homeCopy';
+import { localiseDigits, ui } from '../../app/i18n';
 
-interface BlogViewProps {
-  isLightMode: boolean;
-  onOpenConsultModal: () => void;
+/**
+ * Insights index
+ * --------------------------------------------------------------------------
+ * Editorial layout: one lead article, then a two-column list. Reading opens in
+ * a focused dialog so the index keeps its position and the reader keeps context.
+ */
+export interface BlogViewProps {
+  locale: LocaleKey;
+  onNavigate: (page: PageId) => void;
+  onOpenConsult: () => void;
+  hotline: string;
+  whatsapp: string;
 }
 
-export const BlogView: React.FC<BlogViewProps> = ({
-  isLightMode,
-  onOpenConsultModal,
-}) => {
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [search, setSearch] = useState<string>('');
-  const [selectedArticle, setSelectedArticle] = useState<ArticleItem | null>(null);
+export const BlogView: React.FC<BlogViewProps> = ({ locale, onNavigate, onOpenConsult, hotline, whatsapp }) => {
+  const t = ui(locale);
+  const copy = homeCopy(locale).insights;
+  const [reading, setReading] = React.useState<ArticleItem | null>(null);
 
-  const categories = [
-    { id: 'all', label: 'همه مقالات' },
-    { id: 'ecommerce', label: 'تجارت الکترونیک' },
-    { id: 'seo-ai', label: 'سئو و هوش مصنوعی' },
-    { id: 'ui-ux', label: 'طراحی سایت و UI/UX' },
-  ];
+  const [lead, ...rest] = ARTICLES_DATA;
 
-  const filtered = ARTICLES_DATA.filter(a => {
-    const matchCat = activeCategory === 'all' || a.categoryKey === activeCategory;
-    const matchSearch = a.title.includes(search) || a.summary.includes(search);
-    return matchCat && matchSearch;
-  });
+  /* close the reader with Escape, like every other overlay in the product */
+  React.useEffect(() => {
+    if (!reading) return;
+    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && setReading(null);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [reading]);
+
+  const Meta: React.FC<{ article: ArticleItem; className?: string }> = ({ article, className }) => (
+    <div className={cx('flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-ink-3', className)}>
+      <span className="font-medium text-brand-ink">{article.category}</span>
+      <span aria-hidden="true" className="h-3 w-px bg-line" />
+      <span className="inline-flex items-center gap-1.5">
+        <Timer size={13} aria-hidden="true" />
+        {article.readTime}
+      </span>
+      <span aria-hidden="true" className="h-3 w-px bg-line" />
+      <span className="inline-flex items-center gap-1.5">
+        <CalendarDays size={13} aria-hidden="true" />
+        {article.date}
+      </span>
+      <span aria-hidden="true" className="h-3 w-px bg-line" />
+      <span className="inline-flex items-center gap-1.5">
+        <Eye size={13} aria-hidden="true" />
+        <span data-numeric>{localiseDigits(article.views, locale)}</span>
+      </span>
+    </div>
+  );
 
   return (
-    <div className="w-full py-12 px-4 lg:px-8 max-w-7xl mx-auto">
-      {/* Title */}
-      <div className="text-center max-w-3xl mx-auto mb-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-400/20 text-xs font-bold mb-3">
-          <span className="material-symbols-outlined text-[16px]">menu_book</span>
-          <span>دانشنامه تخصصی طراحی وب و استراتژی رشد دیجیتال</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
-          آموزش، مقالات و تحلیل‌های تخصصی وب
-        </h1>
-        <p className="text-sm text-slate-400">
-          جدیدترین راهنماهای فنی، استانداردهای سئو تکنیکال و متدهای افزایش فروش آنلاین به قلم تیم مهندسی علاءالدین
-        </p>
-      </div>
+    <>
+      <PageHeader
+        page="knowledge-blog"
+        locale={locale}
+        onNavigate={onNavigate}
+        actions={
+          <Button tone="brand" size="lg" onClick={onOpenConsult}>
+            {t.actions.consult}
+          </Button>
+        }
+      />
 
-      {/* Filter and Search */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-white/10">
-        <div className="flex flex-wrap items-center gap-2">
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setActiveCategory(c.id)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                activeCategory === c.id
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                  : isLightMode
-                    ? 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                    : 'bg-[#0b1329] text-slate-300 hover:bg-[#171f35] border border-white/10'
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
+      <Section level="canvas">
+        <div className="flex flex-col gap-3">
+          <p className="text-overline font-semibold uppercase text-ink-3">{copy.tag}</p>
+          <h2 className="max-w-3xl text-title-1">{copy.title}</h2>
+          <p className="max-w-3xl text-body-sm text-ink-2">{copy.description}</p>
         </div>
 
-        <div className="relative w-full md:w-64">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="جستجو در مقالات..."
-            className={`w-full h-10 ps-9 pe-3 rounded-xl text-xs outline-none border transition-all ${
-              isLightMode
-                ? 'bg-white border-slate-200 text-slate-900 focus:border-blue-500'
-                : 'bg-[#0b1329] border-white/10 text-white focus:border-sky-400'
-            }`}
+        {/* lead article */}
+        <article className="mt-10 grid gap-6 overflow-hidden rounded-lg border border-line bg-surface lg:grid-cols-12 lg:gap-0">
+          <img
+            src={lead.img}
+            alt={lead.title}
+            loading="lazy"
+            decoding="async"
+            className="aspect-[16/10] w-full border-b border-line bg-muted object-cover object-top lg:col-span-6 lg:aspect-auto lg:border-b-0 lg:border-e"
           />
-          <span className="material-symbols-outlined text-slate-400 text-[18px] absolute inset-y-0 start-2.5 my-auto h-fit pointer-events-none">
-            search
-          </span>
-        </div>
-      </div>
+          <div className="flex flex-col justify-center p-6 lg:col-span-6 lg:p-10">
+            <Badge tone="brand" variant="square" className="w-fit">
+              {t.labels.featured}
+            </Badge>
+            <h3 className="mt-4 text-title-2">{lead.title}</h3>
+            <p className="mt-3 text-body-sm text-ink-2">{lead.summary}</p>
+            <Meta article={lead} className="mt-5" />
+            <Button
+              tone="brand"
+              emphasis="outline"
+              size="md"
+              className="mt-6 w-fit"
+              onClick={() => setReading(lead)}
+            >
+              {t.actions.readMore}
+              <ArrowRight size={15} aria-hidden="true" className="rtl:rotate-180" />
+            </Button>
+          </div>
+        </article>
 
-      {/* Articles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((article) => (
-          <div
-            key={article.id}
-            onClick={() => setSelectedArticle(article)}
-            className={`group rounded-3xl border overflow-hidden p-4 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 cursor-pointer shadow-md ${
-              isLightMode
-                ? 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-2xl'
-                : 'bg-[#0b1329] border-white/10 hover:border-sky-400/50 hover:shadow-2xl'
-            }`}
+        {/* remaining articles */}
+        <ul className="mt-6 grid gap-6 lg:grid-cols-2">
+          {rest.map(article => (
+            <li key={article.id} className="flex flex-col rounded-lg border border-line bg-surface p-6">
+              <Meta article={article} />
+              <h3 className="mt-4 text-title-3">{article.title}</h3>
+              <p className="mt-3 flex-1 text-body-sm text-ink-2">{article.summary}</p>
+              <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
+                <span className="text-caption text-ink-4">{article.author}</span>
+                <Button tone="brand" emphasis="link" size="sm" className="gap-1.5" onClick={() => setReading(article)}>
+                  {t.actions.readMore}
+                  <ArrowRight size={15} aria-hidden="true" className="rtl:rotate-180" />
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Section>
+
+      <CtaSection locale={locale} onOpenConsult={onOpenConsult} hotline={hotline} whatsapp={whatsapp} />
+
+      {/* reader dialog */}
+      {reading && (
+        <div className="fixed inset-0 z-modal flex items-start justify-center overflow-y-auto p-4 sm:p-8">
+          <button
+            type="button"
+            aria-label={t.forms.close}
+            onClick={() => setReading(null)}
+            className="fixed inset-0 cursor-default bg-overlay animate-fade-in"
+            tabIndex={-1}
+          />
+          <article
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reader-title"
+            className="relative my-8 w-full max-w-2xl animate-scale-in rounded-lg border border-line bg-surface shadow-xl"
           >
-            <div className="flex flex-col">
-              <div className="relative h-48 rounded-2xl overflow-hidden bg-slate-800 mb-4">
-                <img
-                  src={article.img}
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-2 start-2">
-                  <span className="text-[10px] font-mono text-sky-400 bg-[#0b1329]/90 px-2.5 py-0.5 rounded-full border border-white/10">
-                    {article.category}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-400">
-                <span className="material-symbols-outlined text-sky-400 text-[15px]">schedule</span>
-                <span>{article.readTime}</span>
-                <span>•</span>
-                <span>{article.date}</span>
-              </div>
-
-              <h3 className="text-base font-bold mb-2 group-hover:text-sky-400 transition-colors line-clamp-2 leading-snug">
-                {article.title}
-              </h3>
-
-              <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed mb-4">
-                {article.summary}
-              </p>
-            </div>
-
-            <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-slate-400 font-mono">{article.views} مطالعه</span>
-              <span className="text-sky-400 group-hover:underline font-bold flex items-center gap-1">
-                <span>مطالعه کامل</span>
-                <span className="material-symbols-outlined text-[15px]">arrow_back</span>
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Article Reader Modal */}
-      {selectedArticle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div onClick={() => setSelectedArticle(null)} className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
-          <div className="relative w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-3xl bg-[#0b1329] border border-white/15 p-6 sm:p-8 shadow-2xl z-10 text-white">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-400/20">
-                  {selectedArticle.category}
-                </span>
-                <span className="text-xs text-slate-400">{selectedArticle.readTime}</span>
+            <div className="flex items-start justify-between gap-4 border-b border-line p-6">
+              <div>
+                <Meta article={reading} />
+                <h2 id="reader-title" className="mt-3 text-title-2">
+                  {reading.title}
+                </h2>
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedArticle(null)}
-                className="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-500 hover:text-white flex items-center justify-center text-slate-400"
+                onClick={() => setReading(null)}
+                aria-label={t.forms.close}
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-sm border border-line text-ink-3 transition-colors duration-[140ms] hover:bg-neutral-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 leading-snug">
-              {selectedArticle.title}
-            </h2>
-
-            <div className="relative h-64 rounded-2xl overflow-hidden bg-slate-800 mb-6">
-              <img src={selectedArticle.img} alt={selectedArticle.title} className="w-full h-full object-cover" />
-            </div>
-
-            <div className="prose prose-invert max-w-none text-xs sm:text-sm text-slate-300 leading-relaxed flex flex-col gap-4">
-              <p className="font-semibold text-white">{selectedArticle.summary}</p>
+            <div className="flex flex-col gap-4 p-6 text-body-sm text-ink-2">
+              <p className="text-body text-ink">{reading.summary}</p>
               <p>
-                در دنیای امروز، وب‌سایت‌ها صرفاً یک کاتالوگ آنلاین نیستند؛ بلکه هسته اصلی فروش و جذب سرنخ (Lead Generation) کسب‌وکار شما محسوب می‌شوند. اگر معماری پایه‌ای بر اساس سرعت بالا (LCP زیر ۱ ثانیه) و کدهای معنایی استوار نباشد، بیش از ۵۰٪ کاربران پیش از بارگذاری کامل صفحه، سایت را ترک می‌کنند.
+                نسخه کامل این تحلیل همراه با داده‌های اجرایی و چک‌لیست پیاده‌سازی، در دانشنامه اختصاصی علاءالدین
+                منتشر شده است. برای دریافت متن کامل و نمونه‌های واقعی پروژه، درخواست مشاوره ثبت کنید.
               </p>
-              <h4 className="text-base font-bold text-white mt-2">اصول سه‌گانه موفقیت فنی:</h4>
-              <ul className="list-disc list-inside flex flex-col gap-1.5 text-slate-300">
-                <li>استفاده از سیستم کشینگ هوشمند ابری و فشرده‌سازی خودکار عکس‌ها به WebP</li>
-                <li>تزریق تگ‌های اسکیما Schema.org برای درک بهتر موتورهای جستجو و هوش مصنوعی</li>
-                <li>بهینه‌سازی کامل نسخه موبایل و فرایند پرداخت تک‌مرحله‌ای بدون اتلاف وقت کاربر</li>
-              </ul>
-              <p>
-                جهت پیاده‌سازی این استانداردها بر روی پروژه خود، می‌توانید با کارشناسان معماری علاءالدین تماس بگیرید.
-              </p>
+              <div className="flex flex-wrap gap-3 border-t border-line pt-5">
+                <Button tone="brand" size="md" onClick={onOpenConsult}>
+                  {t.actions.consultShort}
+                </Button>
+                <Button tone="neutral" emphasis="outline" size="md" onClick={() => setReading(null)}>
+                  {t.forms.close}
+                </Button>
+              </div>
             </div>
-
-            <div className="mt-8 pt-4 border-t border-white/10 flex items-center justify-between">
-              <span className="text-xs text-slate-400">نویسنده: {selectedArticle.author}</span>
-              <button
-                type="button"
-                onClick={() => { setSelectedArticle(null); onOpenConsultModal(); }}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md"
-              >
-                درخواست مشاوره این موضوع
-              </button>
-            </div>
-          </div>
+          </article>
         </div>
       )}
-    </div>
+    </>
   );
 };

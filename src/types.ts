@@ -10,6 +10,7 @@ export type PageId =
   | 'portfolio'
   | 'templates'
   | 'pricing-calculator'
+  | 'process'
   | 'speed-audit'
   | 'cms-simulator'
   | 'sla-guarantee'

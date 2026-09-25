@@ -1,22 +1,55 @@
 <!doctype html>
-<html lang="fa" dir="rtl" class="dark">
+<html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Aladdin DXP — پلتفرم مهندسی طراحی وب و دیزاین سیستم</title>
-    <meta name="description" content="سیستم جامع طراحی وب‌سایت، پلتفرم‌های فروشگاهی، پورتال‌های سازمانی Next.js و دیزاین سیستم چندزبانه با سئو تکنیکال علاءالدین DXP." />
-    <meta property="og:title" content="Aladdin DXP — پلتفرم مهندسی طراحی وب و دیزاین سیستم" />
-    <meta property="og:description" content="سیستم جامع طراحی وب‌سایت، پلتفرم‌های فروشگاهی، پورتال‌های سازمانی Next.js و دیزاین سیستم چندزبانه با سئو تکنیکال علاءالدین DXP." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fcfcfd" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070b16" media="(prefers-color-scheme: dark)" />
+
+    <title>علاءالدین DXP — طراحی و مهندسی وب‌سایت سازمانی</title>
+    <meta
+      name="description"
+      content="طراحی اختصاصی، مهندسی فرانت‌اند و بهینه‌سازی سرعت برای سازمان‌ها؛ با تعهدنامه سطح خدمت، قیمت شفاف و دیزاین سیستم اختصاصی."
+    />
+    <meta name="robots" content="index, follow" />
+
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Aladdin DXP" />
+    <meta property="og:title" content="علاءالدین DXP — طراحی و مهندسی وب‌سایت سازمانی" />
+    <meta
+      property="og:description"
+      content="پلتفرم مهندسی وب با دیزاین سیستم اختصاصی، استانداردهای دسترس‌پذیری WCAG 2.2 و تضمین سطح خدمت."
+    />
+    <meta property="og:locale" content="fa_IR" />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Persian-first typography: Vazirmatn for text, JetBrains Mono for codes -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    />
+
+    <!--
+      Theme is resolved before first paint so the interface never flashes the
+      wrong palette: stored preference first, then the operating system default.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('aladdin.theme');
+          var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.add(dark ? 'dark' : 'light');
+        } catch (error) {
+          document.documentElement.classList.add('light');
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-[#0a1228] text-[#dbe1ff] min-h-screen antialiased selection:bg-blue-600 selection:text-white">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
