@@ -2,49 +2,113 @@ import * as React from 'react';
 import { cx } from '../../design-system/tokens';
 
 /**
- * Wordmark: geometric mark + bilingual lockup.
- * The mark is drawn from the 4px grid unit so it optically matches the UI text
- * at every size: an offset square (the "atelier" plate) with a brand-coloured
- * inset corner (the "aligned" pixel).
+ * Brand mark
+ * --------------------------------------------------------------------------
+ * A monogram "A" built from two wedges and a crown dot, wrapped in two tilted
+ * orbit rings with a light node on each — the "creative digital solutions"
+ * emblem. Every colour is a token so the mark inverts with the theme:
+ *   · wedges  → text-primary + brand gradient
+ *   · orbits  → border-glass-strong
+ *   · nodes   → brand / cyan
+ * `mode="emblem"` renders the large standalone version used by the welcome
+ * gate and the language dialog; `size` controls the compact header glyph.
  */
 export interface LogoProps {
-  /** rendered size of the glyph */
+  /** rendered size of the glyph (px) */
   size?: number;
   inverse?: boolean;
-  /** hides the Persian wordmark (compact headers, footers) */
+  /** hides the wordmark (compact headers, footers) */
   compact?: boolean;
+  /** `emblem` = orbit rings animate and the mark is drawn with more detail */
+  mode?: 'glyph' | 'emblem';
   className?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 32, inverse, compact, className }) => (
-  <span className={cx('inline-flex items-center gap-2.5', className)}>
+const gradientId = (seed: string) => `aladdin-mark-${seed}`;
+
+export const LogoMark: React.FC<{ size?: number; mode?: 'glyph' | 'emblem'; className?: string }> = ({
+  size = 32,
+  mode = 'glyph',
+  className,
+}) => {
+  const id = React.useId().replace(/:/g, '');
+  const grad = gradientId(id);
+  const emblem = mode === 'emblem';
+
+  return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 64 64"
       role="img"
       aria-hidden="true"
-      className="shrink-0"
+      className={cx('shrink-0 overflow-visible', className)}
     >
-      <rect
-        x="1.25"
-        y="1.25"
-        width="29.5"
-        height="29.5"
-        rx="8"
-        fill={inverse ? 'rgba(255,255,255,0.04)' : 'var(--ds-color-bg-surface)'}
-        stroke={inverse ? 'rgba(255,255,255,0.22)' : 'var(--ds-color-border-default)'}
-        strokeWidth="1.5"
-      />
+      <defs>
+        <linearGradient id={grad} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="var(--ds-primitive-brand-400)" />
+          <stop offset="1" stopColor="var(--ds-primitive-brand-700)" />
+        </linearGradient>
+        <radialGradient id={`${grad}-halo`}>
+          <stop offset="0" stopColor="rgb(var(--ds-glow-brand) / 0.45)" />
+          <stop offset="1" stopColor="rgb(var(--ds-glow-brand) / 0)" />
+        </radialGradient>
+      </defs>
+
+      {emblem && <circle cx="32" cy="32" r="30" fill={`url(#${grad}-halo)`} />}
+
+      {/* orbit rings ------------------------------------------------------- */}
+      <g className={emblem ? 'animate-orbit' : undefined} style={{ transformBox: 'fill-box' }}>
+        <ellipse
+          cx="32"
+          cy="32"
+          rx="30"
+          ry="13"
+          transform="rotate(-24 32 32)"
+          fill="none"
+          stroke="var(--ds-color-border-glass-strong)"
+          strokeWidth={emblem ? 0.9 : 1.4}
+        />
+        <circle cx="4.4" cy="39.4" r={emblem ? 1.9 : 2.6} fill="var(--ds-primitive-cyan-400)" />
+      </g>
+      <g
+        className={emblem ? 'animate-orbit' : undefined}
+        style={{ transformBox: 'fill-box', animationDirection: 'reverse', animationDuration: '38s' }}
+      >
+        <ellipse
+          cx="32"
+          cy="32"
+          rx="30"
+          ry="13"
+          transform="rotate(28 32 32)"
+          fill="none"
+          stroke="var(--ds-color-border-glass-strong)"
+          strokeWidth={emblem ? 0.9 : 1.4}
+          opacity={emblem ? 0.8 : 0.6}
+        />
+        <circle cx="54.8" cy="49.2" r={emblem ? 1.9 : 2.6} fill="var(--ds-primitive-brand-400)" />
+      </g>
+
+      {/* monogram ---------------------------------------------------------- */}
+      {/* left wedge — solid ink */}
       <path
-        d="M9.5 22.5V12.2c0-1.6 1.3-2.9 2.9-2.9h7.3"
-        fill="none"
-        stroke="var(--ds-color-text-primary)"
-        strokeWidth="2.1"
-        strokeLinecap="round"
+        d="M31 15.5 L17 46.5 Q16 49 18.8 49 L26.4 49 Q28.6 49 29.4 46.9 L34 34.4 Z"
+        fill="var(--ds-color-text-primary)"
       />
-      <rect x="13.6" y="17" width="9.9" height="5.5" rx="2.75" fill="var(--ds-color-bg-brand)" />
+      {/* right wedge — brand gradient */}
+      <path
+        d="M33 15.5 L47 46.5 Q48 49 45.2 49 L37.6 49 Q35.4 49 34.6 46.9 L30 34.4 Z"
+        fill={`url(#${grad})`}
+      />
+      {/* crown dot */}
+      <circle cx="32" cy="11.5" r="3.6" fill={`url(#${grad})`} />
     </svg>
+  );
+};
+
+export const Logo: React.FC<LogoProps> = ({ size = 34, inverse, compact, mode = 'glyph', className }) => (
+  <span className={cx('inline-flex items-center gap-2.5', className)}>
+    <LogoMark size={size} mode={mode} />
     {!compact && (
       <span className="flex flex-col leading-none">
         <span
@@ -57,9 +121,10 @@ export const Logo: React.FC<LogoProps> = ({ size = 32, inverse, compact, classNa
         </span>
         <span
           data-numeric
+          dir="ltr"
           className={cx(
-            'mt-0.5 text-[0.625rem] font-medium leading-none',
-            inverse ? 'text-ink-inverse-muted' : 'text-ink-3',
+            'mt-0.5 text-[0.625rem] font-semibold uppercase leading-none tracking-[0.22em]',
+            inverse ? 'text-ink-inverse-muted' : 'text-brand-ink',
           )}
         >
           ALADDIN DXP

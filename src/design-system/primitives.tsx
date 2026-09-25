@@ -29,10 +29,10 @@ const BUTTON_SIZES: Record<ControlSize, string> = {
 const BUTTON_EMPHASIS: Record<Emphasis, Record<Tone, string>> = {
   solid: {
     neutral: 'bg-inverse text-ink-inverse hover:opacity-90 border border-transparent',
-    brand: 'bg-brand text-on-brand hover:bg-brand-hover border border-transparent',
-    success: 'bg-success-ink text-on-brand hover:opacity-90 border border-transparent',
-    warning: 'bg-warning-ink text-on-brand hover:opacity-90 border border-transparent',
-    danger: 'bg-danger-ink text-on-brand hover:opacity-90 border border-transparent',
+    brand: 'bg-brand text-on-brand hover:bg-brand-hover border border-transparent shadow-glow',
+    success: 'bg-success-ink text-on-status hover:opacity-90 border border-transparent',
+    warning: 'bg-warning-ink text-on-status hover:opacity-90 border border-transparent',
+    danger: 'bg-danger-ink text-on-status hover:opacity-90 border border-transparent',
     info: 'bg-brand text-on-brand hover:bg-brand-hover border border-transparent',
   },
   outline: {
@@ -141,8 +141,8 @@ export const Badge: React.FC<BadgeProps> = ({
 /* ========================================================================== */
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** surface level, not a look: canvas/surface/subtle/inverse */
-  level?: 'surface' | 'subtle' | 'inverse';
+  /** surface level, not a look: surface (glass on the atmosphere) / solid / subtle / inverse */
+  level?: 'surface' | 'solid' | 'subtle' | 'inverse' | 'glass';
   /** hairline by default; elevation is reserved for floating layers */
   elevation?: 'flat' | 'raised' | 'dropdown';
   interactive?: boolean;
@@ -154,9 +154,11 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
   ref,
 ) {
   const levels = {
-    surface: 'bg-surface border border-line text-ink',
+    surface: 'glass text-ink',
+    solid: 'bg-surface border border-line text-ink',
     subtle: 'bg-subtle border border-line text-ink',
     inverse: 'bg-inverse border border-line-inverse text-ink-inverse',
+    glass: 'glass text-ink',
   };
   const elevations = {
     flat: '',
@@ -175,7 +177,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
         elevations[elevation],
         paddings[padding],
         interactive &&
-          'transition-[border-color,background-color,box-shadow] duration-[140ms] ease-[cubic-bezier(0.2,0,0,1)] hover:border-line-bold hover:shadow-sm',
+          'transition-[border-color,background-color,box-shadow,transform] duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)] hover:border-glass-line-strong hover:shadow-glow hover:-translate-y-0.5',
         className,
       )}
       {...rest}
@@ -267,14 +269,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     >
       <div className={cx('flex flex-col gap-3', align === 'center' ? 'max-w-3xl items-center' : 'max-w-3xl')}>
         {overline && (
-          <span
-            className={cx(
-              'text-overline font-semibold uppercase tracking-normal',
-              onInverse ? 'text-ink-inverse-muted' : 'text-brand-ink',
-            )}
-          >
-            {overline}
-          </span>
+          <span className={cx('ds-overline', onInverse ? 'text-ink-inverse-muted' : 'text-brand-ink')}>{overline}</span>
         )}
         <Tag
           className={cx(
@@ -284,7 +279,7 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
           )}
         >
           {before}
-          {idx >= 0 && <span className="text-brand-ink">{highlight}</span>}
+          {idx >= 0 && <span className="text-gradient-brand">{highlight}</span>}
           {after}
         </Tag>
         {description && (
@@ -517,7 +512,7 @@ export const IconFrame: React.FC<IconFrameProps> = ({ tone = 'brand', size = 'md
     className={cx(
       'inline-flex shrink-0 items-center justify-center border',
       size === 'md' ? 'size-11 rounded-md' : 'size-9 rounded-sm',
-      tone === 'brand' && 'bg-brand-soft text-brand-ink border-info-line',
+      tone === 'brand' && 'bg-brand-soft text-brand-ink border-info-line shadow-[0_0_24px_-8px_rgb(var(--ds-glow-brand)/0.55)]',
       tone === 'neutral' && 'bg-muted text-ink-2 border-line',
       tone === 'inverse' && 'bg-white/5 text-ink-inverse border-line-inverse',
       className,

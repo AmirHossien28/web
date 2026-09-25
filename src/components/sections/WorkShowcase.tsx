@@ -22,12 +22,21 @@ const Thumbnail: React.FC<{ project: ProjectItem; className?: string }> = ({ pro
   return (
     <div
       className={cx(
-        'relative overflow-hidden rounded-md border border-line bg-muted',
+        'relative overflow-hidden rounded-lg border border-glass-line-strong bg-raised glow-ring',
         className,
       )}
     >
+      {/* browser chrome — the screenshot reads as a live product, not a picture */}
+      <div aria-hidden="true" className="flex h-7 items-center gap-1.5 border-b border-line bg-surface px-3">
+        <span className="size-2 rounded-full bg-danger-ink/70" />
+        <span className="size-2 rounded-full bg-warning-ink/70" />
+        <span className="size-2 rounded-full bg-success-ink/70" />
+        <span dir="ltr" className="ms-3 truncate rounded-full bg-ink/5 px-2.5 text-[0.625rem] leading-4 text-ink-3">
+          {project.domain}
+        </span>
+      </div>
       {failed ? (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-6 text-center">
+        <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 bg-muted p-6 text-center">
           <span data-numeric className="text-title-2 font-bold text-ink-4">
             {project.domain.replace(/^www\./, '').slice(0, 2).toUpperCase()}
           </span>

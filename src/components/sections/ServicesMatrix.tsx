@@ -57,13 +57,17 @@ export const ServicesMatrix: React.FC<ServicesMatrixProps> = ({ locale, onNaviga
         }
       />
 
-      <div className="mt-12 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2">
+      <div className="mt-12 grid gap-4 sm:grid-cols-2">
         {SERVICES_DATA.map(service => {
           const navKey = SERVICE_NAV_KEY[service.pageId];
           const title = t.nav[navKey as keyof typeof t.nav] ?? service.title;
 
           return (
-            <article key={service.id} className="flex flex-col bg-surface p-6 transition-colors duration-[140ms] hover:bg-subtle sm:p-8">
+            <article
+              key={service.id}
+              className="group relative flex flex-col overflow-hidden rounded-lg glass p-6 transition-[border-color,box-shadow,transform] duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)] hover:-translate-y-0.5 hover:border-glass-line-strong hover:shadow-glow sm:p-8"
+            >
+              <span aria-hidden="true" className="pointer-events-none absolute -top-20 -end-20 size-48 rounded-full bg-glow-brand opacity-0 blur-2xl transition-opacity duration-[320ms] group-hover:opacity-60" />
               <div className="flex items-start justify-between gap-4">
                 <IconFrame>{SERVICE_ICONS[service.pageId]}</IconFrame>
                 <span className="rounded-full border border-line px-2.5 py-1 text-[0.6875rem] font-medium text-ink-3">

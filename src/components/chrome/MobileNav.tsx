@@ -6,7 +6,7 @@ import { Button } from '../../design-system/primitives';
 import { activeNavFor, PAGE_SLUG, PRIMARY_NAV } from '../../app/navigation';
 import { ui, localiseDigits } from '../../app/i18n';
 import { Logo } from './Logo';
-import { LanguageSwitcher, ThemeToggle } from './controls';
+import { LanguageButton, ThemeToggle } from './controls';
 
 /**
  * Mobile navigation drawer.
@@ -20,7 +20,7 @@ export interface MobileNavProps {
   locale: LocaleKey;
   isLight: boolean;
   onNavigate: (page: PageId) => void;
-  onLocaleChange: (locale: LocaleKey) => void;
+  onOpenLanguage: () => void;
   onThemeToggle: () => void;
   onOpenConsult: () => void;
   hotline: string;
@@ -33,7 +33,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
   locale,
   isLight,
   onNavigate,
-  onLocaleChange,
+  onOpenLanguage,
   onThemeToggle,
   onOpenConsult,
   hotline,
@@ -93,13 +93,13 @@ export const MobileNav: React.FC<MobileNavProps> = ({
         type="button"
         aria-label={t.common.closeMenu}
         onClick={onClose}
-        className="absolute inset-0 h-full w-full cursor-default bg-overlay animate-fade-in"
+        className="absolute inset-0 h-full w-full cursor-default bg-overlay backdrop-blur-sm animate-fade-in"
         tabIndex={-1}
       />
 
       <div
         ref={panelRef}
-        className="absolute inset-y-0 end-0 flex w-[min(23rem,88vw)] flex-col border-s border-line bg-surface shadow-xl"
+        className="absolute inset-y-0 end-0 flex w-[min(23rem,88vw)] flex-col border-s border-glass-line bg-glass-strong shadow-xl backdrop-blur-2xl"
       >
         <div className="flex items-center justify-between border-b border-line px-4 py-3">
           <Logo size={28} />
@@ -198,7 +198,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
 
           <div className="mt-5 flex items-center justify-between rounded-md border border-line bg-subtle px-3 py-2.5">
             <span className="text-caption text-ink-3">{t.common.chooseLanguage}</span>
-            <LanguageSwitcher locale={locale} onChange={onLocaleChange} />
+            <LanguageButton locale={locale} onOpen={() => { onClose(); onOpenLanguage(); }} />
           </div>
         </nav>
 

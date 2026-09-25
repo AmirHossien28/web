@@ -6,7 +6,7 @@ import { Button } from '../../design-system/primitives';
 import { activeNavFor, PAGE_SLUG, PRIMARY_NAV, type NavItem } from '../../app/navigation';
 import { ui, localiseDigits } from '../../app/i18n';
 import { Logo } from './Logo';
-import { ThemeToggle } from './controls';
+import { LanguageButton, ThemeToggle } from './controls';
 
 export interface SiteHeaderProps {
   currentPage: PageId;
@@ -16,6 +16,7 @@ export interface SiteHeaderProps {
   onThemeToggle: () => void;
   onOpenMobileNav: () => void;
   onOpenConsult: () => void;
+  onOpenLanguage: () => void;
   hotline: string;
 }
 
@@ -58,9 +59,9 @@ const NavMenu: React.FC<{
     <div
       ref={ref}
       id={`menu-${item.id}`}
-      className="absolute end-0 top-[calc(100%+0.75rem)] z-dropdown w-[26rem] animate-scale-in rounded-lg border border-line bg-surface p-2 shadow-lg"
+      className="absolute end-0 top-[calc(100%+0.75rem)] z-dropdown w-[26rem] animate-scale-in rounded-lg glass-strong p-2"
     >
-      <p className="px-3 pb-2 pt-2 text-overline font-semibold uppercase text-ink-3">
+      <p className="ds-overline px-3 pb-2 pt-2 text-ink-3">
         {t.nav[item.childrenTitleKey as keyof typeof t.nav]}
       </p>
       <ul>
@@ -110,6 +111,7 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
   onThemeToggle,
   onOpenMobileNav,
   onOpenConsult,
+  onOpenLanguage,
   hotline,
 }) => {
   const t = ui(locale);
@@ -126,8 +128,8 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
   return (
     <header
       className={cx(
-        'sticky top-0 z-sticky border-b bg-surface/85 backdrop-blur-md transition-[border-color,box-shadow,height] duration-[200ms]',
-        scrolled ? 'border-line shadow-xs' : 'border-transparent',
+        'sticky top-0 z-sticky border-b bg-canvas/70 backdrop-blur-xl transition-[border-color,box-shadow,height] duration-[200ms]',
+        scrolled ? 'border-glass-line shadow-[0_8px_32px_-16px_rgb(5_9_20/0.6)]' : 'border-transparent',
       )}
     >
       <div className="container-page">
@@ -222,7 +224,8 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
               </span>
             </a>
 
-            <div className="hidden lg:block">
+            <div className="hidden items-center gap-2 lg:flex">
+              <LanguageButton locale={locale} onOpen={onOpenLanguage} variant="icon" />
               <ThemeToggle isLight={isLight} onToggle={onThemeToggle} locale={locale} />
             </div>
 

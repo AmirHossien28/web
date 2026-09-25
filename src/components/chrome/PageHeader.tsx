@@ -36,8 +36,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   const rtl = t.dir === 'rtl';
 
   return (
-    <div className="border-b border-line bg-subtle">
-      <div className="container-page">
+    <div className="relative overflow-hidden border-b border-line bg-subtle">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-grid-lines" />
+      <div aria-hidden="true" className="pointer-events-none absolute -top-48 start-[20%] h-80 w-[40rem] rounded-full bg-glow-brand opacity-60 blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-40 -end-24 size-80 rounded-full bg-glow-cyan opacity-60 blur-3xl" />
+      <div className="container-page relative">
         <div className="flex flex-col gap-6 py-10 md:py-14">
           {crumbs.length > 0 && (
             <nav aria-label={t.common.breadcrumb}>
@@ -72,6 +75,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="max-w-3xl">
+              <p className="ds-overline mb-3 text-brand-ink">{t.brand.tagline}</p>
               <h1 className="text-title-1 md:text-display-2">{title ?? meta.title}</h1>
               <p className="mt-3 text-body-sm text-ink-2 md:text-body">
                 {description ?? meta.description}

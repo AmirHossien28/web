@@ -2,6 +2,7 @@ import * as React from 'react';
 import type { LocaleKey } from '../../types';
 import { PROJECTS_DATA } from '../../data/projects';
 import { Section } from '../../design-system/primitives';
+import { cx } from '../../design-system/tokens';
 import { localiseDigits } from '../../app/i18n';
 import { homeCopy, type HomeStat } from '../../app/homeCopy';
 
@@ -31,41 +32,48 @@ export const TrustStrip: React.FC<{ locale: LocaleKey }> = ({ locale }) => {
   ).slice(0, 6);
 
   return (
-    <Section level="subtle" spacing="sm" className="border-b border-line">
-      <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-        <div className="lg:col-span-3">
-          <p className="text-overline font-semibold uppercase text-ink-3">{copy.clients}</p>
-          <p className="mt-2 text-body-sm font-medium text-ink">{copy.title}</p>
-        </div>
+    <Section level="subtle" spacing="sm" className="relative overflow-hidden border-b border-line">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-40 start-1/2 h-72 w-[48rem] -translate-x-1/2 rounded-full bg-glow-brand opacity-40 blur-3xl rtl:translate-x-1/2" />
 
-        <ul className="flex flex-wrap items-center gap-x-8 gap-y-4 lg:col-span-9">
+      {/* four hard numbers — large value, quiet label, as on an investor page */}
+      <dl className="relative grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {copy.stats.map((stat, index) => (
+          <div key={stat.label} className="relative rounded-lg glass p-6">
+            <dd
+              data-numeric
+              className={cx(
+                'text-display-2 font-bold leading-none lg:text-[2.75rem]',
+                index === 0 ? 'text-gradient-brand' : 'text-ink',
+              )}
+            >
+              {renderStatValue(stat, locale)}
+            </dd>
+            <dt className="ds-overline mt-3 text-ink-2">{stat.label}</dt>
+            {stat.hint && <p className="mt-1 text-caption text-ink-3">{stat.hint}</p>}
+          </div>
+        ))}
+      </dl>
+
+      {/* client marks as quiet pills */}
+      <div className="relative mt-8 flex flex-col items-center gap-4 lg:flex-row lg:justify-between">
+        <p className="text-caption text-ink-3">
+          <span className="ds-overline me-2 text-brand-ink">{copy.clients}</span>
+          {copy.title}
+        </p>
+        <ul className="flex flex-wrap items-center justify-center gap-2">
           {marks.map(mark => (
             <li
               key={mark}
-              className="text-body-sm font-semibold lowercase text-ink-4 transition-colors duration-[140ms] hover:text-ink-2"
+              className="inline-flex h-9 items-center gap-2 rounded-full glass px-4 text-caption font-semibold text-ink-2 transition-colors duration-[140ms] hover:text-ink"
             >
-              <span dir="ltr" className="ltr-isolate">
+              <span aria-hidden="true" className="size-1.5 rounded-full bg-brand" />
+              <span dir="ltr" className="ltr-isolate lowercase">
                 {mark}
               </span>
             </li>
           ))}
         </ul>
       </div>
-
-      <dl className="mt-10 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-        {copy.stats.map(stat => (
-          <div key={stat.label} className="bg-surface p-6">
-            <dt className="text-caption text-ink-3">{stat.label}</dt>
-            <dd
-              data-numeric
-              className="mt-2 text-title-1 font-bold leading-none text-ink"
-            >
-              {renderStatValue(stat, locale)}
-            </dd>
-            {stat.hint && <p className="mt-2 text-caption text-ink-4">{stat.hint}</p>}
-          </div>
-        ))}
-      </dl>
     </Section>
   );
 };

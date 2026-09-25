@@ -46,14 +46,30 @@ Rules enforced by `src/design-system/tokens.css`:
 | Group | Tokens | Notes |
 | --- | --- | --- |
 | Surfaces | `bg-canvas`, `bg-surface`, `bg-raised`, `bg-subtle`, `bg-muted`, `bg-inset` | five quiet steps; page ground is never pure white |
-| Text | `text-ink`, `text-ink-2`, `text-ink-3`, `text-ink-4` | 15.9:1 / 7.4:1 / 4.8:1 / non-text only |
-| Brand | `bg-brand`, `bg-brand-hover`, `bg-brand-soft`, `text-brand-ink`, `text-on-brand` | exactly one accent |
+| Text | `text-ink`, `text-ink-2`, `text-ink-3`, `text-ink-4` | light 14.6:1 / 7.4:1 / 4.8:1 · dark 16.2:1 / 9.6:1 / 5.9:1 · ink-4 non-text only |
+| Brand | `bg-brand`, `bg-brand-hover`, `bg-brand-soft`, `text-brand-ink`, `text-on-brand` | exactly one accent — **electric blue** (`brand-600 #2563eb` on light, `brand-300 #93bbfd` as text on dark); cyan (`accent-cyan`) exists only as the second stop of `text-gradient-brand` |
+| Atmosphere | `glass`, `glass-strong`, `bg-glow-brand`, `bg-glow-cyan`, `bg-grid-lines`, `glow-ring`, `code-decor`, `border-glass-line(-strong)` | the depth language of the product — see § 3.1 |
 | Status | `success` / `warning` / `danger` / `info` (+ `-ink`, `-line` variants) | pairs of subtle surface + readable text |
 | Data | `data-1 … data-4`, `data-track` | charts, meters, score bars |
 | Deep band | `bg-deep`, `text-on-deep`, `text-on-deep-muted`, `text-on-deep-accent`, `border-deep-line` | a deliberately dark surface in **both** themes, used for the closing CTA |
 
 Themes are one switch on `<html>` (`class="dark"`) re-pointing semantic tokens.
-Components contain **zero** conditional theme logic.
+**Dark (deep navy `#050914`) is the brand default**; light is an explicit user choice persisted in `aladdin.theme`.
+Components contain **zero** conditional theme logic. A band that must stay dark in both themes (the closing CTA) simply carries the `dark` class — its subtree re-scopes every token.
+
+### 3.1 Atmosphere — grid, light, glass
+
+The reference language (deep-navy tech agencies, glass language pickers) is expressed with three token-driven layers, never with images:
+
+| Layer | Utility | Definition |
+| --- | --- | --- |
+| Grid | `bg-grid-lines` | 1px hairlines every 56px in `--ds-color-grid-line`, faded by a radial mask so the grid never touches the edges |
+| Light | `bg-glow-brand`, `bg-glow-cyan` | radial gradients from the `--ds-glow-*` rgb triplets; always `blur-3xl`, always `aria-hidden`, at most two per section |
+| Glass | `glass`, `glass-strong` | `--ds-color-bg-glass` + hairline `--ds-color-border-glass` + `backdrop-filter: blur(18/24px)` + a 1px inner top highlight. `Card` uses it by default; dialogs and menus use `glass-strong` (opaque enough for text) |
+| Emphasis | `glow-ring`, `shadow-glow`, `text-gradient-brand` | reserved for device frames, the primary button and one highlighted phrase per heading |
+| Decor | `code-decor` | faint monospace fragments (`</>`, `cloud.deploy()`) — hidden below `lg`, never localised, never read by AT |
+
+Rules: glows never carry information; glass panels keep ≥ 3:1 border contrast against the canvas; `letter-spacing` in `ds-overline` applies only under `[dir=ltr]`.
 
 ## 4. Typography
 
@@ -92,7 +108,7 @@ Components contain **zero** conditional theme logic.
 | --- | --- |
 | `Button` | tones × emphasis (solid/outline/ghost/link) × sizes (44/40/34px); `iconOnly` enforces a 44px square |
 | `Badge` | pill or square metadata label, optional status dot |
-| `Card` | one container: level (surface/subtle/inverse) × elevation × padding |
+| `Card` | one container: level (surface = glass / solid / subtle / inverse) × elevation × padding; interactive cards lift 2px and gain `shadow-glow` |
 | `Section` | enforces page rhythm, container width and band colour |
 | `SectionHeading` | the single section-header pattern (overline, title + brand highlight, description, actions) |
 | `Stat` | numeric proof unit (value, label, hint) |
@@ -100,6 +116,10 @@ Components contain **zero** conditional theme logic.
 | `Meter` | accessible progress/score bar with `role="meter"` and a text value |
 | `Disclosure` | accordion row with `aria-expanded` / `aria-controls` and a labelled region |
 | `IconFrame` | consistent glyph container used across feature blocks |
+| `LogoMark` / `Logo` | monogram in two tilted orbit rings; `mode="emblem"` animates the orbits (welcome gate) |
+| `LanguageTile` / `LanguageModal` | the "Global experience" picker: flag + native name + English name · code, search by any of them, `aria-current` on the active locale |
+| `DeviceShowcase` | CSS-drawn laptop / tablet / phone with truthful KPI screens and four product-line callouts |
+| `WelcomeGate` | first-visit landing (emblem, brand line, five market tiles); shown once, re-openable with `?welcome` |
 
 ## 8. Accessibility contract (WCAG 2.2 AA)
 

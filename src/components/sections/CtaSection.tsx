@@ -4,6 +4,7 @@ import type { LocaleKey } from '../../types';
 import { SECTIONS_I18N } from '../../data/sectionsI18n';
 import { Button } from '../../design-system/primitives';
 import { localiseDigits, ui } from '../../app/i18n';
+import { QuickRequestForm } from './QuickRequestForm';
 
 /**
  * Closing call to action
@@ -23,12 +24,15 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ locale, onOpenConsult, h
   const section = SECTIONS_I18N[locale].ctaSection;
 
   return (
-    <section className="bg-deep">
-      <div className="container-page">
-        <div className="grid gap-10 py-16 lg:grid-cols-12 lg:items-center lg:gap-16 lg:py-20">
-          <div className="lg:col-span-7">
-            <p className="text-overline font-semibold uppercase text-on-deep-muted">{section.tag}</p>
-            <h2 className="mt-3 text-title-1 text-on-deep lg:text-display-2">{section.title}</h2>
+    <section className="dark relative overflow-hidden bg-deep">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-grid-lines opacity-70" />
+      <div aria-hidden="true" className="pointer-events-none absolute -top-40 -start-32 size-[32rem] rounded-full bg-glow-brand blur-3xl" />
+      <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -end-24 size-[28rem] rounded-full bg-glow-cyan blur-3xl" />
+      <div className="container-page relative">
+        <div className="grid gap-10 py-16 lg:grid-cols-12 lg:items-center lg:gap-16 lg:py-24">
+          <div className="lg:col-span-6">
+            <p className="ds-overline text-on-deep-accent">{section.tag}</p>
+            <h2 className="mt-3 text-title-1 text-on-deep lg:text-display-1">{section.title}</h2>
             <p className="mt-4 max-w-2xl text-body-sm text-on-deep-muted lg:text-body">{section.description}</p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -65,9 +69,8 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ locale, onOpenConsult, h
                 </Button>
               </a>
             </div>
-          </div>
 
-          <ul className="flex flex-col gap-4 border-t border-deep-line pt-8 lg:col-span-5 lg:border-s lg:border-t-0 lg:ps-10 lg:pt-0">
+            <ul className="mt-10 flex flex-col gap-3 border-t border-deep-line pt-6">
             {[
               { icon: <Clock size={16} aria-hidden="true" />, text: t.utility.responseTime },
               { icon: <ShieldCheck size={16} aria-hidden="true" />, text: SECTIONS_I18N[locale].navTools.slaGuaranteeDesc },
@@ -80,7 +83,13 @@ export const CtaSection: React.FC<CtaSectionProps> = ({ locale, onOpenConsult, h
                 {item.text}
               </li>
             ))}
-          </ul>
+            </ul>
+          </div>
+
+          {/* conversion device on glass */}
+          <div className="lg:col-span-6">
+            <QuickRequestForm locale={locale} />
+          </div>
         </div>
       </div>
     </section>

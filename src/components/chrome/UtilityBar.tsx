@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Clock, Phone } from 'lucide-react';
 import type { LocaleKey } from '../../types';
 import { ui, localiseDigits } from '../../app/i18n';
-import { LanguageSwitcher } from './controls';
+import { LanguageButton } from './controls';
 
 /**
  * Utility bar — the quiet strip above the header.
@@ -11,15 +11,15 @@ import { LanguageSwitcher } from './controls';
  */
 export interface UtilityBarProps {
   locale: LocaleKey;
-  onLocaleChange: (locale: LocaleKey) => void;
+  onOpenLanguage: () => void;
   hotline: string;
 }
 
-export const UtilityBar: React.FC<UtilityBarProps> = ({ locale, onLocaleChange, hotline }) => {
+export const UtilityBar: React.FC<UtilityBarProps> = ({ locale, onOpenLanguage, hotline }) => {
   const t = ui(locale);
 
   return (
-    <div className="hidden border-b border-line bg-subtle lg:block">
+    <div className="hidden border-b border-line bg-subtle/80 backdrop-blur-md lg:block">
       <div className="container-page">
         <div className="flex h-10 items-center justify-between gap-6 text-caption text-ink-3">
           <div className="flex items-center gap-5">
@@ -46,7 +46,7 @@ export const UtilityBar: React.FC<UtilityBarProps> = ({ locale, onLocaleChange, 
               {t.utility.available}
             </span>
             <span aria-hidden="true" className="h-4 w-px bg-line" />
-            <LanguageSwitcher locale={locale} onChange={onLocaleChange} />
+            <LanguageButton locale={locale} onOpen={onOpenLanguage} />
           </div>
         </div>
       </div>

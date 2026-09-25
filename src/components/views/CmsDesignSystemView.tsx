@@ -52,11 +52,11 @@ const SEMANTIC_GROUPS: { title: string; tokens: { name: string; className: strin
   {
     title: 'متن (Text)',
     tokens: [
-      { name: 'text-ink', className: 'bg-ink', note: 'متن اصلی — کنتراست ۱۵.۹:۱' },
-      { name: 'text-ink-2', className: 'bg-ink-2', note: 'متن ثانویه — ۷.۴:۱' },
-      { name: 'text-ink-3', className: 'bg-ink-3', note: 'متن کم‌رنگ — ۴.۸:۱' },
+      { name: 'text-ink', className: 'bg-ink', note: 'متن اصلی — کنتراست ۱۴.۶:۱ / ۱۶.۲:۱' },
+      { name: 'text-ink-2', className: 'bg-ink-2', note: 'متن ثانویه — ۷.۴:۱ / ۹.۶:۱' },
+      { name: 'text-ink-3', className: 'bg-ink-3', note: 'متن کم‌رنگ — ۴.۸:۱ / ۵.۹:۱' },
       { name: 'text-ink-4', className: 'bg-ink-4', note: 'فقط عناصر غیرمتنی' },
-      { name: 'text-brand-ink', className: 'bg-brand-ink', note: 'تأکید برند — ۶.۹:۱' },
+      { name: 'text-brand-ink', className: 'bg-brand-ink', note: 'تأکید برند — ۶.۳:۱ / ۹.۴:۱' },
     ],
   },
   {
@@ -67,6 +67,17 @@ const SEMANTIC_GROUPS: { title: string; tokens: { name: string; className: strin
       { name: 'danger-ink', className: 'bg-danger-ink', note: 'خطا / اثر بالا' },
       { name: 'border-line', className: 'bg-line', note: 'حاشیه مویی' },
       { name: 'border-focus', className: 'bg-focus', note: 'حلقه فوکوس ۲ پیکسل' },
+    ],
+  },
+  {
+    title: 'اتمسفر (Atmosphere)',
+    tokens: [
+      { name: 'glass', className: 'glass', note: 'پنل شیشه‌ای — blur ۱۸px + حاشیه مویی' },
+      { name: 'glass-strong', className: 'glass-strong', note: 'دیالوگ و منوی شناور' },
+      { name: 'bg-glow-brand', className: 'bg-glow-brand', note: 'منبع نور آبی (radial)' },
+      { name: 'bg-glow-cyan', className: 'bg-glow-cyan', note: 'منبع نور فیروزه‌ای' },
+      { name: 'bg-grid-lines', className: 'bg-grid-lines', note: 'شبکه ۵۶px با محو شعاعی' },
+      { name: 'text-gradient-brand', className: 'bg-gradient-to-l from-brand to-accent-cyan', note: 'گرادیان تأکید در تیترها' },
     ],
   },
 ];
@@ -113,8 +124,8 @@ const PRINCIPLES = [
   },
   {
     icon: <Sparkles size={18} aria-hidden="true" />,
-    title: 'یک لهجه رنگی',
-    body: 'فقط یک رنگ برند برای اقدام؛ رنگ‌های دیگر مخصوص داده و وضعیت‌اند و تزئینی نیستند.',
+    title: 'یک لهجه رنگی، یک اتمسفر',
+    body: 'آبی الکتریک تنها رنگ اقدام است؛ عمق صفحه با سه لایه توکن‌محور ساخته می‌شود: شبکه مویی، منابع نور و پنل‌های شیشه‌ای.',
   },
 ];
 

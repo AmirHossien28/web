@@ -35,20 +35,26 @@
   --ds-primitive-ink-900: #101828;
   --ds-primitive-ink-950: #0a0f1c;
   --ds-primitive-white: #ffffff;
-  --ds-primitive-navy-900: #0a1228; /* heritage brand navy: inverse surfaces */
+  --ds-primitive-navy-700: #14315e; /* heritage brand navy: headings on light */
+  --ds-primitive-navy-800: #0f2347;
+  --ds-primitive-navy-900: #0a1228; /* inverse surfaces */
   --ds-primitive-navy-950: #060a17;
 
-  /* brand (indigo-blue) ------------------------------------------------------ */
-  --ds-primitive-brand-50: #eef4ff;
-  --ds-primitive-brand-100: #e0eaff;
-  --ds-primitive-brand-200: #c7d7fe;
-  --ds-primitive-brand-300: #a4bcfd;
-  --ds-primitive-brand-400: #8098f9;
-  --ds-primitive-brand-500: #6172f3;
-  --ds-primitive-brand-600: #444ce7;
-  --ds-primitive-brand-700: #3538cd;
-  --ds-primitive-brand-800: #2d31a6;
-  --ds-primitive-brand-900: #2d3282;
+  /* brand (electric blue) ---------------------------------------------------- */
+  --ds-primitive-brand-50: #eff5ff;
+  --ds-primitive-brand-100: #dbe8fe;
+  --ds-primitive-brand-200: #bfd6fe;
+  --ds-primitive-brand-300: #93bbfd;
+  --ds-primitive-brand-400: #609afa;
+  --ds-primitive-brand-500: #3b7cf6;
+  --ds-primitive-brand-600: #2563eb;
+  --ds-primitive-brand-700: #1d4fd8;
+  --ds-primitive-brand-800: #1e40af;
+  --ds-primitive-brand-900: #1e3a8a;
+  /* cyan — the second stop of the brand gradient, never used alone for text */
+  --ds-primitive-cyan-300: #67e8f9;
+  --ds-primitive-cyan-400: #22d3ee;
+  --ds-primitive-cyan-500: #06b6d4;
 
   /* teal — technical / data accent ------------------------------------------ */
   --ds-primitive-teal-50: #f0fdf9;
@@ -141,19 +147,31 @@
   color-scheme: light;
 
   /* surfaces --------------------------------------------------------------- */
-  --ds-color-bg-canvas: var(--ds-primitive-ink-25); /* page ground           */
+  --ds-color-bg-canvas: #f6f9ff; /* page ground — a cool, faintly blue white  */
   --ds-color-bg-surface: var(--ds-primitive-white); /* cards, sheets         */
   --ds-color-bg-raised: var(--ds-primitive-white);
-  --ds-color-bg-subtle: var(--ds-primitive-ink-50); /* quiet bands           */
+  --ds-color-bg-subtle: #eef3fc; /* quiet bands                                */
   --ds-color-bg-muted: var(--ds-primitive-ink-100); /* inset wells           */
   --ds-color-bg-inset: var(--ds-primitive-ink-100);
   --ds-color-bg-inverse: var(--ds-primitive-navy-900);
   --ds-color-bg-inverse-soft: #111a36;
   --ds-color-bg-brand-subtle: var(--ds-primitive-brand-50);
-  --ds-color-bg-brand: var(--ds-primitive-brand-700);
-  --ds-color-bg-brand-hover: var(--ds-primitive-brand-800);
+  --ds-color-bg-brand: var(--ds-primitive-brand-600);
+  --ds-color-bg-brand-hover: var(--ds-primitive-brand-700);
   --ds-color-bg-neutral-hover: var(--ds-primitive-ink-100);
-  --ds-color-bg-overlay: rgb(10 15 28 / 0.55); /* scrims                   */
+  --ds-color-bg-overlay: rgb(10 18 40 / 0.45); /* scrims (blurred)        */
+
+  /* glass — translucent surfaces that sit on the atmospheric background.
+     Both themes keep ≥ 3:1 for borders against the canvas behind them. */
+  --ds-color-bg-glass: rgb(255 255 255 / 0.62);
+  --ds-color-bg-glass-strong: rgb(255 255 255 / 0.84);
+  --ds-color-border-glass: rgb(20 49 94 / 0.10);
+  --ds-color-border-glass-strong: rgb(20 49 94 / 0.18);
+  --ds-color-grid-line: rgb(20 49 94 / 0.07);
+  --ds-glow-brand: 37 99 235; /* rgb triplet for radial glows            */
+  --ds-glow-cyan: 6 182 212;
+  --ds-shadow-glow-brand: 0 10px 30px -10px rgb(37 99 235 / 0.45);
+  --ds-color-text-code-decor: rgb(20 49 94 / 0.16);
 
   /* deep band — a deliberately dark surface in BOTH themes, used for the
      closing call to action. Its own token group keeps contrast guarantees
@@ -166,13 +184,13 @@
   --ds-color-bg-skeleton: var(--ds-primitive-ink-200);
 
   /* text — ratio measured against bg-canvas / bg-surface ------------------- */
-  --ds-color-text-primary: var(--ds-primitive-ink-900); /* 15.9:1           */
+  --ds-color-text-primary: var(--ds-primitive-navy-800); /* 14.6:1          */
   --ds-color-text-secondary: var(--ds-primitive-ink-600); /* 7.4:1          */
   --ds-color-text-muted: var(--ds-primitive-ink-500); /* 4.8:1 body-safe   */
   --ds-color-text-faint: var(--ds-primitive-ink-400); /* non-text only     */
   --ds-color-text-inverse: var(--ds-primitive-ink-25);
   --ds-color-text-inverse-muted: #a5b0c9; /* 7.1:1 on navy-900          */
-  --ds-color-text-brand: var(--ds-primitive-brand-700); /* 6.9:1          */
+  --ds-color-text-brand: var(--ds-primitive-brand-700); /* 6.3:1          */
   --ds-color-text-on-brand: var(--ds-primitive-white); /* 8.9:1            */
   --ds-color-text-success: var(--ds-primitive-green-700);
   --ds-color-text-warning: var(--ds-primitive-amber-700);
@@ -218,43 +236,53 @@
 .dark {
   color-scheme: dark;
 
-  --ds-color-bg-canvas: #070b16;
-  --ds-color-bg-surface: #0e1424;
-  --ds-color-bg-raised: #131a2c;
-  --ds-color-bg-subtle: #0b1020;
-  --ds-color-bg-muted: #161e33;
-  --ds-color-bg-inset: #161e33;
+  --ds-color-bg-canvas: #050914; /* deep navy ground                       */
+  --ds-color-bg-surface: #0b1226;
+  --ds-color-bg-raised: #101a36;
+  --ds-color-bg-subtle: #070d1c;
+  --ds-color-bg-muted: #121c38;
+  --ds-color-bg-inset: #0e1730;
   --ds-color-bg-inverse: var(--ds-primitive-ink-25);
   --ds-color-bg-inverse-soft: #ffffff;
-  --ds-color-bg-brand-subtle: rgb(97 114 243 / 0.14);
-  --ds-color-bg-brand: var(--ds-primitive-brand-500);
-  --ds-color-bg-brand-hover: var(--ds-primitive-brand-400);
+  --ds-color-bg-brand-subtle: rgb(59 124 246 / 0.16);
+  --ds-color-bg-brand: var(--ds-primitive-brand-600); /* white on it: 5.8:1  */
+  --ds-color-bg-brand-hover: var(--ds-primitive-brand-500);
   --ds-color-bg-neutral-hover: rgb(255 255 255 / 0.06);
-  --ds-color-bg-overlay: rgb(3 6 14 / 0.72);
+  --ds-color-bg-overlay: rgb(2 5 14 / 0.66);
 
-  --ds-color-bg-deep: #0f1730;
+  --ds-color-bg-glass: rgb(255 255 255 / 0.04);
+  --ds-color-bg-glass-strong: rgb(13 20 43 / 0.82);
+  --ds-color-border-glass: rgb(255 255 255 / 0.10);
+  --ds-color-border-glass-strong: rgb(147 187 253 / 0.28);
+  --ds-color-grid-line: rgb(147 187 253 / 0.07);
+  --ds-glow-brand: 59 124 246;
+  --ds-glow-cyan: 34 211 238;
+  --ds-shadow-glow-brand: 0 12px 36px -10px rgb(59 124 246 / 0.6);
+  --ds-color-text-code-decor: rgb(147 187 253 / 0.16);
+
+  --ds-color-bg-deep: #0a1128;
   --ds-color-text-on-deep: #eef2fb;
   --ds-color-text-on-deep-muted: #a9b4cd;
   --ds-color-text-on-deep-accent: #a4bcfd;
   --ds-color-border-on-deep: rgb(255 255 255 / 0.14);
   --ds-color-bg-skeleton: #1d2939;
 
-  --ds-color-text-primary: #eef2fb; /* 15.1:1 on canvas                 */
-  --ds-color-text-secondary: #b6c0d6; /* 9.2:1                          */
-  --ds-color-text-muted: #8e9ab5; /* 6.1:1                            */
-  --ds-color-text-faint: #6a7590;
+  --ds-color-text-primary: #f1f5ff; /* 16.2:1 on canvas                 */
+  --ds-color-text-secondary: #b7c3dd; /* 9.6:1                          */
+  --ds-color-text-muted: #8b98b8; /* 5.9:1                            */
+  --ds-color-text-faint: #667398;
   --ds-color-text-inverse: var(--ds-primitive-ink-900);
   --ds-color-text-inverse-muted: var(--ds-primitive-ink-600);
-  --ds-color-text-brand: var(--ds-primitive-brand-300); /* 7.6:1          */
-  --ds-color-text-on-brand: var(--ds-primitive-navy-950);
+  --ds-color-text-brand: var(--ds-primitive-brand-300); /* 9.4:1          */
+  --ds-color-text-on-brand: var(--ds-primitive-white);
   --ds-color-text-success: #75e0a7;
   --ds-color-text-warning: #fec84b;
   --ds-color-text-danger: #fda29b;
   --ds-color-text-on-status: var(--ds-primitive-navy-950);
 
-  --ds-color-border-subtle: #1e2740;
-  --ds-color-border-default: #2b3550;
-  --ds-color-border-strong: #475467;
+  --ds-color-border-subtle: rgb(147 187 253 / 0.10);
+  --ds-color-border-default: rgb(147 187 253 / 0.16);
+  --ds-color-border-strong: rgb(147 187 253 / 0.30);
   --ds-color-border-inverse: rgb(16 24 40 / 0.12);
   --ds-color-border-focus: var(--ds-primitive-brand-400);
 
@@ -268,10 +296,10 @@
   --ds-color-border-info: rgb(128 152 249 / 0.28);
 
   --ds-color-data-1: var(--ds-primitive-brand-400);
-  --ds-color-data-2: #2ed3b7;
+  --ds-color-data-2: var(--ds-primitive-cyan-400);
   --ds-color-data-3: #fdb022;
   --ds-color-data-4: #b6c0d6;
-  --ds-color-data-track: #1e2740;
+  --ds-color-data-track: #182347;
 
   --ds-elevation-raised: none;
   --ds-elevation-dropdown: 0 12px 24px -8px rgb(0 0 0 / 0.6);
@@ -300,6 +328,12 @@
   --color-on-deep-accent: var(--ds-color-text-on-deep-accent);
   --color-deep-line: var(--ds-color-border-on-deep);
   --color-skeleton: var(--ds-color-bg-skeleton);
+  --color-glass: var(--ds-color-bg-glass);
+  --color-glass-strong: var(--ds-color-bg-glass-strong);
+  --color-glass-line: var(--ds-color-border-glass);
+  --color-glass-line-strong: var(--ds-color-border-glass-strong);
+  --color-grid: var(--ds-color-grid-line);
+  --color-accent-cyan: var(--ds-primitive-cyan-400);
 
   --color-ink: var(--ds-color-text-primary);
   --color-ink-2: var(--ds-color-text-secondary);
@@ -319,6 +353,7 @@
   --color-brand-soft: var(--ds-color-bg-brand-subtle);
   --color-brand-ink: var(--ds-color-text-brand);
   --color-on-brand: var(--ds-color-text-on-brand);
+  --color-on-status: var(--ds-color-text-on-status);
   --color-neutral-hover: var(--ds-color-bg-neutral-hover);
 
   --color-success: var(--ds-color-bg-success-subtle);
@@ -377,6 +412,7 @@
   --shadow-md: var(--ds-primitive-shadow-md);
   --shadow-lg: var(--ds-primitive-shadow-lg);
   --shadow-xl: var(--ds-primitive-shadow-xl);
+  --shadow-glow: var(--ds-shadow-glow-brand);
 
   --container-page: 78rem; /* 1248 — reading-optimised content column   */
   --container-prose: 46rem; /* 736 — long-form article measure           */
@@ -511,12 +547,127 @@
 @utility text-gradient-brand {
   background-image: linear-gradient(
     92deg,
-    var(--ds-color-text-brand) 0%,
-    var(--ds-color-data-2) 100%
+    var(--ds-primitive-brand-300) 0%,
+    var(--ds-primitive-brand-400) 45%,
+    var(--ds-primitive-cyan-300) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  .light & {
+    background-image: linear-gradient(
+      92deg,
+      var(--ds-primitive-brand-700) 0%,
+      var(--ds-primitive-brand-500) 55%,
+      var(--ds-primitive-cyan-500) 100%
+    );
+  }
+}
+
+/* --------------------------------------------------------------------------
+   ATMOSPHERE — the "deep-space" background language shared by hero, gate,
+   dialogs and the closing band. Three layers, all token-driven:
+     grid   → 1px hairline grid, fading at the edges
+     glow   → soft radial brand/cyan light sources
+     glass  → translucent panels with a hairline and a top highlight
+   -------------------------------------------------------------------------- */
+@utility bg-grid-lines {
+  background-image:
+    linear-gradient(to right, var(--ds-color-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ds-color-grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 40%, transparent 100%);
+}
+
+@utility bg-glow-brand {
+  background: radial-gradient(closest-side, rgb(var(--ds-glow-brand) / 0.45), transparent 70%);
+}
+
+@utility bg-glow-cyan {
+  background: radial-gradient(closest-side, rgb(var(--ds-glow-cyan) / 0.28), transparent 70%);
+}
+
+@utility glass {
+  background-color: var(--ds-color-bg-glass);
+  border: 1px solid var(--ds-color-border-glass);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.06),
+    0 1px 2px 0 rgb(5 9 20 / 0.08);
+}
+
+@utility glass-strong {
+  background-color: var(--ds-color-bg-glass-strong);
+  border: 1px solid var(--ds-color-border-glass);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.08),
+    0 32px 64px -24px rgb(5 9 20 / 0.6);
+}
+
+@utility glow-ring {
+  box-shadow:
+    0 0 0 1px var(--ds-color-border-glass-strong),
+    0 0 40px -8px rgb(var(--ds-glow-brand) / 0.45);
+}
+
+/* overline: tracked small caps for Latin scripts, plain weight for Persian/Arabic
+   (letter-spacing must stay 0 in connected scripts) */
+@utility ds-overline {
+  font-size: var(--text-overline);
+  line-height: var(--text-overline--line-height);
+  font-weight: var(--ds-primitive-weight-semibold);
+  :where([dir='ltr']) & {
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+}
+
+/* faint monospace code fragments used as background art */
+@utility code-decor {
+  position: absolute;
+  font-family: var(--ds-primitive-font-mono);
+  font-size: 0.8125rem;
+  color: var(--ds-color-text-code-decor);
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  direction: ltr;
+}
+
+@keyframes ds-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes ds-orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ds-pulse-dot {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.35); }
+}
+
+@utility animate-float {
+  animation: ds-float 7s ease-in-out infinite;
+}
+
+@utility animate-float-slow {
+  animation: ds-float 11s ease-in-out infinite;
+}
+
+@utility animate-orbit {
+  animation: ds-orbit 28s linear infinite;
+  transform-origin: center;
+}
+
+@utility animate-pulse-dot {
+  animation: ds-pulse-dot 2.6s ease-in-out infinite;
 }
 
 @keyframes ds-rise {

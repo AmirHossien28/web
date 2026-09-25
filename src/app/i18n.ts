@@ -118,6 +118,28 @@ export interface UIStrings {
     close: string;
     optional: string;
   };
+  brand: {
+    /** short brand line under the emblem (welcome gate, language dialog) */
+    tagline: string;
+    /** full legal/brand name shown once on the welcome gate */
+    name: string;
+  };
+  language: {
+    overline: string;
+    title: string;
+    subtitle: string;
+    search: string;
+    noResults: string;
+    current: string;
+    enter: string;
+  };
+  showcase: {
+    web: string;
+    dashboard: string;
+    mobile: string;
+    portal: string;
+    live: string;
+  };
   labels: {
     featured: string;
     bestValue: string;
@@ -240,6 +262,26 @@ const FA: UIStrings = {
     successDesc: 'کارشناس ارشد ما در نخستین ساعت کاری با شما تماس میگیرد و پیشنهاد اولیه را ارائه میکند.',
     close: 'بستن',
     optional: 'اختیاری',
+  },
+  brand: {
+    tagline: 'راهکارهای خلاق دیجیتال',
+    name: 'گروه بین‌المللی علاءالدین',
+  },
+  language: {
+    overline: 'تجربه جهانی',
+    title: 'زبان خود را انتخاب کنید',
+    subtitle: 'محتوا، واحد پول و اطلاعات تماس بر اساس زبان انتخابی تنظیم می‌شود.',
+    search: 'جست‌وجو بر اساس نام یا کد زبان',
+    noResults: 'زبانی با این مشخصات پیدا نشد.',
+    current: 'زبان فعلی',
+    enter: 'ورود به سایت',
+  },
+  showcase: {
+    web: 'طراحی وب',
+    dashboard: 'داشبورد مدیریتی',
+    mobile: 'اپلیکیشن موبایل',
+    portal: 'پورتال مشتریان',
+    live: 'آنلاین',
   },
   labels: {
     featured: 'شاخص',
@@ -430,6 +472,26 @@ const EN: UIStrings = {
     close: 'Close',
     optional: 'optional',
   },
+  brand: {
+    tagline: 'Creative Digital Solutions',
+    name: 'Aladdin International Group',
+  },
+  language: {
+    overline: 'Global experience',
+    title: 'Choose your language',
+    subtitle: 'Content, currency and contact details follow the language you pick.',
+    search: 'Search by language or code',
+    noResults: 'No language matches your search.',
+    current: 'Current language',
+    enter: 'Enter the site',
+  },
+  showcase: {
+    web: 'Web Design',
+    dashboard: 'Dashboard UI',
+    mobile: 'Mobile App',
+    portal: 'Client Portal',
+    live: 'Live',
+  },
   labels: {
     featured: 'Featured',
     bestValue: 'Best value',
@@ -572,6 +634,26 @@ const AR: UIStrings = {
     close: 'إغلاق',
     optional: 'اختياري',
   },
+  brand: {
+    tagline: 'حلول رقمية إبداعية',
+    name: 'مجموعة علاء الدين الدولية',
+  },
+  language: {
+    overline: 'تجربة عالمية',
+    title: 'اختر لغتك',
+    subtitle: 'يتم ضبط المحتوى والعملة وبيانات التواصل حسب اللغة المختارة.',
+    search: 'ابحث بالاسم أو رمز اللغة',
+    noResults: 'لا توجد لغة مطابقة لبحثك.',
+    current: 'اللغة الحالية',
+    enter: 'الدخول إلى الموقع',
+  },
+  showcase: {
+    web: 'تصميم الويب',
+    dashboard: 'لوحة التحكم',
+    mobile: 'تطبيق الجوال',
+    portal: 'بوابة العملاء',
+    live: 'مباشر',
+  },
   labels: {
     ...FA.labels,
     featured: 'مميز',
@@ -692,6 +774,26 @@ const TR: UIStrings = {
     successDesc: 'Kıdemli danışmanımız bir iş saati içinde ilk teklifle dönecek.',
     close: 'Kapat',
     optional: 'isteğe bağlı',
+  },
+  brand: {
+    tagline: 'Yaratıcı Dijital Çözümler',
+    name: 'Aladdin International Group',
+  },
+  language: {
+    overline: 'Küresel deneyim',
+    title: 'Dilinizi seçin',
+    subtitle: 'İçerik, para birimi ve iletişim bilgileri seçtiğiniz dile göre ayarlanır.',
+    search: 'Dil adı veya koduyla arayın',
+    noResults: 'Aramanızla eşleşen dil bulunamadı.',
+    current: 'Geçerli dil',
+    enter: 'Siteye gir',
+  },
+  showcase: {
+    web: 'Web Tasarımı',
+    dashboard: 'Yönetim Paneli',
+    mobile: 'Mobil Uygulama',
+    portal: 'Müşteri Portalı',
+    live: 'Canlı',
   },
   labels: {
     ...FA.labels,
@@ -814,6 +916,26 @@ const DE: UIStrings = {
     successDesc: 'Ein Senior-Berater meldet sich innerhalb der nächsten Geschäftsstunde mit einem Erstangebot.',
     close: 'Schließen',
     optional: 'optional',
+  },
+  brand: {
+    tagline: 'Kreative digitale Lösungen',
+    name: 'Aladdin International Group',
+  },
+  language: {
+    overline: 'Globales Erlebnis',
+    title: 'Wählen Sie Ihre Sprache',
+    subtitle: 'Inhalte, Währung und Kontaktdaten richten sich nach der gewählten Sprache.',
+    search: 'Nach Sprache oder Code suchen',
+    noResults: 'Keine Sprache entspricht Ihrer Suche.',
+    current: 'Aktuelle Sprache',
+    enter: 'Website öffnen',
+  },
+  showcase: {
+    web: 'Webdesign',
+    dashboard: 'Dashboard-UI',
+    mobile: 'Mobile App',
+    portal: 'Kundenportal',
+    live: 'Live',
   },
   labels: {
     ...FA.labels,

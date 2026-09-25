@@ -51,8 +51,9 @@ export const SiteFooter: React.FC<SiteFooterProps> = ({
   };
 
   return (
-    <footer className="border-t border-line bg-subtle">
-      <div className="container-page">
+    <footer className="relative overflow-hidden border-t border-line bg-subtle">
+      <div aria-hidden="true" className="pointer-events-none absolute -top-56 start-1/2 h-96 w-[60rem] -translate-x-1/2 rounded-full bg-glow-brand opacity-40 blur-3xl rtl:translate-x-1/2" />
+      <div className="container-page relative">
         <div className="grid gap-10 py-12 md:py-16 lg:grid-cols-12 lg:gap-8">
           {/* brand + contact ------------------------------------------------- */}
           <div className="lg:col-span-4">

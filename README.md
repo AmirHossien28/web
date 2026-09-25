@@ -60,7 +60,7 @@ the product itself at `/design-system` (linked from the header menu).
 src/design-system/
   tokens.css      primitives → semantic tokens (light + dark) → Tailwind theme bridge
   tokens.ts       typed token API (space, radius, grid, motion, z-index)
-  primitives.tsx  Button, Badge, Card, Section, SectionHeading, Stat, Field, Meter, Disclosure, IconFrame
+  primitives.tsx  Button, Badge, Card (glass by default), Section, SectionHeading, Stat, Field, Meter, Disclosure, IconFrame
 src/app/          information architecture, i18n copy, page metadata
 src/components/   chrome (header/footer/mobile nav) · sections (home) · views (pages) · modals · widgets
 ```
@@ -68,7 +68,9 @@ src/components/   chrome (header/footer/mobile nav) · sections (home) · views 
 Key properties:
 
 - **Three token layers** with one-way references; components read semantic tokens only.
-- **Light and dark themes** from the same class list — one `dark` class on `<html>`.
+- **Deep-navy dark theme by default**, light as an explicit choice — same class list, one `dark` class on `<html>`.
+- **Atmosphere layer** (`bg-grid-lines`, `bg-glow-*`, `glass`, `text-gradient-brand`): the depth of the interface is built from tokens, not images.
+- **Welcome gate + language dialog**: first visit lands on the emblem and the five market tiles (`?welcome=1` re-opens it); the header globe opens the searchable "Global experience" picker.
 - **RTL-first**, logical CSS properties, localised digits for `fa`/`ar`, isolated Latin runs for phone numbers, domains and codes.
 - **WCAG 2.2 AA** encoded in the tokens and primitives: 4.5:1 text contrast, 2px focus rings, 44px targets, focus never hidden behind the sticky header.
 - **Persian typography** tuned for the script: Vazirmatn, `letter-spacing: 0`, body line-height 1.8–1.85.

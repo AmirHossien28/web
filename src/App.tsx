@@ -27,10 +27,13 @@ import { CmsSimulatorView } from './components/views/CmsSimulatorView';
 import { SlaGuaranteeView } from './components/views/SlaGuaranteeView';
 import { PortfolioPreviewModal } from './components/modals/PortfolioPreviewModal';
 import { QuickConsultModal } from './components/modals/QuickConsultModal';
+import { LanguageModal } from './components/modals/LanguageModal';
+import { WelcomeGate } from './components/views/WelcomeGate';
 import { ChatbotWidget } from './components/widgets/ChatbotWidget';
 
 const THEME_KEY = 'aladdin.theme';
 const LOCALE_KEY = 'aladdin.locale';
+const WELCOME_KEY = 'aladdin.welcomed';
 
 /**
  * Application shell
@@ -63,16 +66,42 @@ export default function App() {
     try {
       const stored = window.localStorage.getItem(THEME_KEY);
       if (stored) return stored === 'light';
-      return !window.matchMedia('(prefers-color-scheme: dark)').matches;
+      /* brand default is the deep-navy theme; the toggle persists any override */
+      return false;
     } catch {
-      return true;
+      return false;
     }
   });
 
   /* ------------------------------- overlays ----------------------------- */
   const [previewProject, setPreviewProject] = React.useState<ProjectItem | null>(null);
   const [consultOpen, setConsultOpen] = React.useState(false);
+  const [languageOpen, setLanguageOpen] = React.useState(false);
   const [navOpen, setNavOpen] = React.useState(false);
+
+  /* welcome gate: first visit only (no stored locale, no ?lang), or ?welcome */
+  const [gateOpen, setGateOpen] = React.useState<boolean>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('welcome')) return true;
+      if (params.get('lang')) return false;
+      return !window.localStorage.getItem(WELCOME_KEY) && !window.localStorage.getItem(LOCALE_KEY);
+    } catch {
+      return false;
+    }
+  });
+
+  const closeGate = React.useCallback(() => {
+    setGateOpen(false);
+    try {
+      window.localStorage.setItem(WELCOME_KEY, '1');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('welcome');
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const t = ui(locale);
 
@@ -145,6 +174,23 @@ export default function App() {
   const openPreview = (project: ProjectItem) => setPreviewProject(project);
 
   /* ------------------------------ rendering ----------------------------- */
+  if (gateOpen) {
+    return (
+      <WelcomeGate
+        locale={locale}
+        isLight={isLight}
+        hotline={hotline}
+        onSelectLocale={next => {
+          changeLocale(next);
+          closeGate();
+        }}
+        onThemeToggle={toggleTheme}
+        onNavigate={navigate}
+        onEnter={closeGate}
+      />
+    );
+  }
+
   const renderPage = () => {
     switch (page) {
       case 'home':
@@ -289,7 +335,7 @@ export default function App() {
         {t.common.skipToContent}
       </a>
 
-      <UtilityBar locale={locale} onLocaleChange={changeLocale} hotline={hotline} />
+      <UtilityBar locale={locale} onOpenLanguage={() => setLanguageOpen(true)} hotline={hotline} />
 
       <SiteHeader
         currentPage={page}
@@ -299,6 +345,7 @@ export default function App() {
         onThemeToggle={toggleTheme}
         onOpenMobileNav={() => setNavOpen(true)}
         onOpenConsult={() => setConsultOpen(true)}
+        onOpenLanguage={() => setLanguageOpen(true)}
         hotline={hotline}
       />
 
@@ -331,7 +378,7 @@ export default function App() {
         locale={locale}
         isLight={isLight}
         onNavigate={navigate}
-        onLocaleChange={changeLocale}
+        onOpenLanguage={() => setLanguageOpen(true)}
         onThemeToggle={toggleTheme}
         onOpenConsult={() => setConsultOpen(true)}
         hotline={hotline}
@@ -348,6 +395,13 @@ export default function App() {
         isOpen={consultOpen}
         onClose={() => setConsultOpen(false)}
         currentLocale={locale}
+      />
+
+      <LanguageModal
+        isOpen={languageOpen}
+        locale={locale}
+        onClose={() => setLanguageOpen(false)}
+        onSelect={changeLocale}
       />
 
       <ChatbotWidget

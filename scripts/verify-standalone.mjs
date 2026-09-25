@@ -23,7 +23,7 @@ const dom = new JSDOM(html, {
   runScripts: 'dangerously',
   pretendToBeVisual: true,
   virtualConsole,
-  url: `file:///${file}`,
+  url: `file:///${file}?welcome=1`,
 });
 
 const { window } = dom;
@@ -35,6 +35,14 @@ const check = (name, ok, detail = '') => results.push([name, ok, detail]);
 const rootText = () => document.getElementById('root')?.textContent ?? '';
 
 await wait(1300);
+
+/* ------------------------------------------------------------ welcome gate */
+
+check('welcome gate renders on first visit', /زبان خود را انتخاب کنید/.test(rootText()) && document.querySelectorAll('button[lang]').length === 5);
+const tile = document.querySelector('button[lang="fa"]');
+tile?.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+await wait();
+check('choosing a language enters the site', Boolean(document.querySelector('header')) && Boolean(document.querySelector('a[href="#main"]')));
 
 /* ---------------------------------------------------------------- rendering */
 
@@ -94,6 +102,27 @@ if (consult) {
   document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   await wait();
   check('dialog closes on Escape', !document.querySelector('[role="dialog"][aria-modal="true"]'));
+}
+
+/* language dialog: opens from the header globe, filters, switches locale */
+const globe = document.querySelector('button[aria-haspopup="dialog"]');
+check('language button present', Boolean(globe));
+if (globe) {
+  globe.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  await wait();
+  const dialog = document.querySelector('[role="dialog"][aria-labelledby="language-title"]');
+  check('language dialog opens', Boolean(dialog));
+  const search = dialog?.querySelector('input[type="search"]');
+  if (search) {
+    const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+    setValue.call(search, 'de');
+    search.dispatchEvent(new window.Event('input', { bubbles: true }));
+    await wait();
+    check('language search filters tiles', dialog.querySelectorAll('button[lang]').length === 1);
+    dialog.querySelector('button[lang="de"]')?.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+    await wait();
+    check('locale switches to German', document.documentElement.getAttribute('lang') === 'de' && document.documentElement.getAttribute('dir') === 'ltr');
+  }
 }
 
 /* Only real application errors count: jsdom reports unimplemented browser APIs
